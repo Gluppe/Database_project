@@ -10,4 +10,18 @@ class OrdersModel {
             DB_USER, DB_PWD,
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     }
+
+    public function getOrders(): array {
+        $res = array();
+
+        $query = 'SELECT `order`.*, o.ski_type_id, o.quantity FROM `order` INNER JOIN order_skis o';
+
+        $stmt = $this->db->query($query);
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+    }
+
 }
