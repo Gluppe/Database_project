@@ -24,4 +24,22 @@ class OrdersModel {
         return $res;
     }
 
+    public function addOrder(array $skis): int {
+        foreach ($skis as $key => $value) {
+            echo "{$key} => {$value} ";
+        }
+        $total_price = 1;
+        $state = "new";
+        $reference_to_larger_order = null;
+        $customer_id = 10;
+        $stmt = $this->db->prepare(
+            'INSERT INTO `order` (total_price, state, reference_to_larger_order, customer_id)'
+            . ' VALUES(:total_price, :state, :reference_to_larger_order, :customer_id)');
+        $stmt->bindValue(':total_price', $total_price);
+        $stmt->bindValue(':state', $state);
+        $stmt->bindValue(':reference_to_larger_order', $reference_to_larger_order);
+        $stmt->bindValue(':customer_id', $customer_id);
+        $stmt->execute();
+        return $this->db->lastInsertId();
+    }
 }
