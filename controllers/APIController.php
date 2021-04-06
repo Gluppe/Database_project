@@ -6,14 +6,8 @@ class APIController
 {
     public function isValidEndpoint(array $uri): bool
     {
-        if ($uri[0] == RESTConstants::ENDPOINT_ORDERS) {
-            if (count($uri) == 1) {
-                // A request for the collection of used cars
-                return true;
-            } elseif (count($uri) == 2) {
-                // The car id must be a number
-                return ctype_digit($uri[1]);
-            }
+        if (strtolower($uri[0]) == RESTConstants::ENDPOINT_ORDERS) {
+            return true;
         }
         return false;
     }
@@ -22,7 +16,7 @@ class APIController
         switch ($uri[0]) {
             case RESTConstants::ENDPOINT_ORDERS:
                 // The only method implemented is for getting individual car resources
-                return count($uri) == 2 && $requestMethod == RESTConstants::METHOD_GET;
+                return $requestMethod == RESTConstants::METHOD_GET;
         }
         return false;
     }
@@ -49,12 +43,9 @@ class APIController
 
     protected function handleOrdersRequest(array $uri, string $requestMethod, array $queries, array $payload): array
     {
-        if (count($uri) == 1) {
+        if ($requestMethod == RESTConstants::METHOD_GET) {
             $model = new OrdersModel();
-            return $model->getCollection();
-        } elseif (count($uri) == 2) {
-            $model = new OrdersModel();
-            return $model->getResource(intval($uri[1]));
+            return $model->getOrders();
         }
         return array();
     }
