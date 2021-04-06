@@ -1,5 +1,5 @@
 <?php
-require_once  'dbCredentials.php';
+require_once 'dbCredentials.php';
 
 class OrdersModel {
     protected $db;
