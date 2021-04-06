@@ -1,12 +1,12 @@
 <?php
 require_once 'RESTConstants.php';
-require_once 'db/CarModel.php';
+require_once 'models/OrdersModel.php';
 
 class APIController
 {
     public function isValidEndpoint(array $uri): bool
     {
-        if ($uri[0] == RESTConstants::ENDPOINT_CARS) {
+        if ($uri[0] == RESTConstants::ENDPOINT_ORDERS) {
             if (count($uri) == 1) {
                 // A request for the collection of used cars
                 return true;
@@ -20,7 +20,7 @@ class APIController
 
     public function isValidMethod(array $uri, string $requestMethod): bool {
         switch ($uri[0]) {
-            case RESTConstants::ENDPOINT_CARS:
+            case RESTConstants::ENDPOINT_ORDERS:
                 // The only method implemented is for getting individual car resources
                 return count($uri) == 2 && $requestMethod == RESTConstants::METHOD_GET;
         }
@@ -40,20 +40,20 @@ class APIController
     {
         $endpointUri = $uri[0];
         switch ($endpointUri) {
-            case RESTConstants::ENDPOINT_CARS:
-                return $this->handleCarRequest($uri, $requestMethod, $queries, $payload);
+            case RESTConstants::ENDPOINT_ORDERS:
+                return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
                 break;
         }
         return array();
     }
 
-    protected function handleCarRequest(array $uri, string $requestMethod, array $queries, array $payload): array
+    protected function handleOrdersRequest(array $uri, string $requestMethod, array $queries, array $payload): array
     {
         if (count($uri) == 1) {
-            $model = new CarModel();
+            $model = new OrdersModel();
             return $model->getCollection();
         } elseif (count($uri) == 2) {
-            $model = new CarModel();
+            $model = new OrdersModel();
             return $model->getResource(intval($uri[1]));
         }
         return array();
