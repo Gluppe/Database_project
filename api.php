@@ -13,7 +13,7 @@ $queries = array();
 
 $path = $_SERVER['PHP_SELF'];
 $path = ltrim($path, "/");
-$pathArray = explode( '/', $path);
+$uri = explode( '/', $path);
 
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -30,30 +30,48 @@ $token = isset($_COOKIE['auth_token']) ? $_COOKIE['auth_token'] : '';
 $controller = new APIController();
 
 // Check that the request is valid
-if (!$controller->isValidEndpoint($pathArray)) {
+if (!$controller->isValidEndpoint($uri)) {
     // Endpoint not recognised
     http_response_code(RESTConstants::HTTP_NOT_FOUND);
     return;
 }
-if (!$controller->isValidMethod($pathArray, $requestMethod)) {
+if (!$controller->isValidMethod($uri, $requestMethod)) {
     // Method not supported
     http_response_code(RESTConstants::HTTP_METHOD_NOT_ALLOWED);
     return;
 }
-if (!$controller->isValidPayload($pathArray, $requestMethod, $payload)) {
+if (!$controller->isValidPayload($uri, $requestMethod, $payload)) {
     // Payload is incorrectly formatted
     http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     return;
 }
 
 try {
-    $res = $controller->handleRequest($pathArray, $requestMethod, $queries, $payload);
-    if ($requestMethod == RESTConstants::METHOD_GET && count($res) == 0) {
+    $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
+
+    if (count($res) == 0) {
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
-    } else {
-        http_response_code(RESTConstants::HTTP_OK);
-        print(json_encode($res));
     }
+    switch($requestMethod) {
+        case RESTConstants::METHOD_GET:
+            http_response_code(RESTConstants::HTTP_OK);
+            print(json_encode($res));
+            break;
+        case RESTConstants::METHOD_POST:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Updated");
+            break;
+        case RESTConstants::METHOD_PUT:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Added");
+            break;
+        case RESTConstants::METHOD_DELETE:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Deleted");
+            break;
+
+    }
+
 } catch (Exception $e) {
     http_response_code(RESTConstants::HTTP_INTERNAL_SERVER_ERROR);
     return;
