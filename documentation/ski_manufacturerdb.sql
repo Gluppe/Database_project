@@ -3,7 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2021 at 12:29 PM
+
+-- Generation Time: Apr 08, 2021 at 02:30 PM
+
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -40,8 +42,7 @@ CREATE TABLE `customer` (
 
 INSERT INTO `customer` (`ID`, `name`, `start_date`, `end_date`) VALUES
 (10, 'Stian', '2021-03-21', NULL),
-(11, 'Stian', '2021-03-21', NULL),
-(69, 'Stian', '2021-03-23', NULL);
+(11, 'Stian', '2021-03-21', NULL);
 
 -- --------------------------------------------------------
 
@@ -104,19 +105,19 @@ CREATE TABLE `order` (
   `state` varchar(50) NOT NULL,
   `reference_to_larger_order` int(11) DEFAULT NULL,
   `shipment_number` int(11) DEFAULT NULL,
-  `customer_id` int(11) NOT NULL
+  `customer_id` int(11) NOT NULL,
+  `date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `order`
 --
 
-INSERT INTO `order` (`order_number`, `total_price`, `state`, `reference_to_larger_order`, `shipment_number`, `customer_id`) VALUES
-(420, 1000, 'new', NULL, 100, 10),
-(423, 1, 'new', NULL, NULL, 11),
-(424, 1, 'new', NULL, NULL, 69),
-(426, 50, 'new', NULL, NULL, 69),
-(427, 1, 'new', NULL, NULL, 10);
+
+INSERT INTO `order` (`order_number`, `total_price`, `state`, `reference_to_larger_order`, `shipment_number`, `customer_id`, `date`) VALUES
+(1, 1000, 'new', NULL, 100, 10, '2021-04-07'),
+(428, 500, 'new', NULL, 100, 10, '2021-04-01');
+
 
 -- --------------------------------------------------------
 
@@ -135,8 +136,11 @@ CREATE TABLE `order_skis` (
 --
 
 INSERT INTO `order_skis` (`ski_type_id`, `quantity`, `order_number`) VALUES
-(1, 5, 420),
-(2, 10, 420);
+(1, 15, 1),
+(1, 5, 428),
+(2, 20, 1),
+(2, 10, 428);
+
 
 -- --------------------------------------------------------
 
@@ -193,7 +197,8 @@ CREATE TABLE `shipments` (
 --
 
 INSERT INTO `shipments` (`shipment_number`, `store_name`, `shipping_address`, `scheduled_pickup_date`, `status`, `driver_id`, `transporter_company_id`) VALUES
-(100, 'kys', 'Nyvegen 16', '2021-03-23', 'pickupable', 5, 500);
+(100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500);
+
 
 -- --------------------------------------------------------
 
@@ -243,8 +248,8 @@ CREATE TABLE `ski_type` (
 --
 
 INSERT INTO `ski_type` (`ID`, `model`, `type`, `temperature`, `grip_system`, `size`, `weight_class`, `description`, `discontinued`, `url`, `MSRP`) VALUES
-(1, 'Super ski 3000', 'Classic', 'warm', 'super grip', 142, '80-90', 'is good ski yes', 0, '', 1000),
-(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'very shit ski', 0, 'google.com', 500);
+(1, 'Super ski 3000', 'Classic', 'warm', 'super grip', 142, '80-90', 'This is a classic ski', 0, '', 1000),
+(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'This is a ski', 0, '', 500);
 
 -- --------------------------------------------------------
 
@@ -412,7 +417,8 @@ ALTER TABLE `employee`
 -- AUTO_INCREMENT for table `order`
 --
 ALTER TABLE `order`
-  MODIFY `order_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=428;
+  MODIFY `order_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=429;
+
 
 --
 -- AUTO_INCREMENT for table `production_plan`
@@ -474,7 +480,8 @@ ALTER TABLE `order`
 --
 ALTER TABLE `order_skis`
   ADD CONSTRAINT `order_skis_ibfk_1` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`ID`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `order_skis_ibfk_2` FOREIGN KEY (`order_number`) REFERENCES `order` (`order_number`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `order_skis_ibfk_2` FOREIGN KEY (`order_number`) REFERENCES `order` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 --
 -- Constraints for table `production_plan`
@@ -511,8 +518,9 @@ ALTER TABLE `shopkeeper`
 -- Constraints for table `ski`
 --
 ALTER TABLE `ski`
-  ADD CONSTRAINT `ski_ibfk_1` FOREIGN KEY (`order_no`) REFERENCES `order` (`order_number`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `ski_ibfk_2` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `ski_ibfk_1` FOREIGN KEY (`order_no`) REFERENCES `order` (`order_number`) ON DELETE NO ACTION,
+  ADD CONSTRAINT `ski_ibfk_2` FOREIGN KEY (`ski_type_id`) REFERENCES `ski_type` (`ID`) ON DELETE NO ACTION;
+
 
 --
 -- Constraints for table `team_skier`
