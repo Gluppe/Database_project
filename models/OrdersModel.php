@@ -28,8 +28,9 @@ class OrdersModel {
             $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
             $stmt2->bindValue(":current_ON", $currentOrderNumber);
             $stmt2->execute();
+            $orderSkisRow = array();
             while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
-                $orderSkisRow[ $row2["ski_type_id"]] = $row2["quantity"];
+                $orderSkisRow[$row2["ski_type_id"]] = $row2["quantity"];
             }
             //array_push($row, $orderSkisRow);
             $row["skiType_quantity"] = $orderSkisRow;

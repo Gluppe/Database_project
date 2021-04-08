@@ -1,6 +1,7 @@
 <?php
 require_once 'RESTConstants.php';
 require_once 'models/OrdersModel.php';
+require_once 'models/SkisModel.php';
 
 class APIController
 {

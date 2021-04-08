@@ -1,7 +1,7 @@
 <?php
 require_once 'dbCredentials.php';
 
-class skisModel
+class SkisModel
 {
 
     public function __construct()
