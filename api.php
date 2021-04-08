@@ -6,10 +6,17 @@ header('Content-Type: application/json');
 
 // Parse request parameters
 $queries = array();
-parse_str($_SERVER['QUERY_STRING'], $queries);
+if (!empty($_SERVER['QUERY_STRING'])) {
+    parse_str($_SERVER['QUERY_STRING'], $queries);
+    $querySince = explode( ',', $queries['since']);
+    unset($queries['request']);
+}
 
-$uri = explode( '/', $queries['request']);
-unset($queries['request']);
+
+$path = $_SERVER['PHP_SELF'];
+$path = ltrim($path, "/");
+$uri = explode( '/', $path);
+
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -43,12 +50,30 @@ if (!$controller->isValidPayload($uri, $requestMethod, $payload)) {
 
 try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
-    if ($requestMethod == RESTConstants::METHOD_GET && count($res) == 0) {
+
+    if (count($res) == 0) {
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
-    } else {
-        http_response_code(RESTConstants::HTTP_OK);
-        print(json_encode($res));
     }
+    switch($requestMethod) {
+        case RESTConstants::METHOD_GET:
+            http_response_code(RESTConstants::HTTP_OK);
+            print(json_encode($res));
+            break;
+        case RESTConstants::METHOD_POST:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Updated");
+            break;
+        case RESTConstants::METHOD_PUT:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Added");
+            break;
+        case RESTConstants::METHOD_DELETE:
+            http_response_code(RESTConstants::HTTP_OK);
+            print("Successfully Deleted");
+            break;
+
+    }
+
 } catch (Exception $e) {
     http_response_code(RESTConstants::HTTP_INTERNAL_SERVER_ERROR);
     return;

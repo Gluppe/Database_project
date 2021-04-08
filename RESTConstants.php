@@ -22,10 +22,10 @@ class RESTConstants
     const HTTP_INTERNAL_SERVER_ERROR = 500;
     const HTTP_NOT_IMPLEMENTED = 501;
 
-    const ENDPOINT_ORDERS = 'Orders';
-    const ENDPOINT_ORDER = 'Order';
-    const ENDPOINT_SKIS = 'Skis';
-    const ENDPOINT_SKI = 'Ski';
-    const ENDPOINT_SHIPMENT = 'Shipment';
-    const ENDPOINT_PRODUCTIONPLAN = 'Production-Plan';
+    const ENDPOINT_ORDERS = 'orders';
+    const ENDPOINT_ORDER = 'order';
+    const ENDPOINT_SKIS = 'skis';
+    const ENDPOINT_SKI = 'ski';
+    const ENDPOINT_SHIPMENT = 'shipment';
+    const ENDPOINT_PRODUCTIONPLAN = 'production-plan';
 }
