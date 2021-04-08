@@ -6,10 +6,12 @@ header('Content-Type: application/json');
 
 // Parse request parameters
 $queries = array();
-//parse_str($_SERVER['QUERY_STRING'], $queries);
+if (!empty($_SERVER['QUERY_STRING'])) {
+    parse_str($_SERVER['QUERY_STRING'], $queries);
+    $querySince = explode( ',', $queries['since']);
+    unset($queries['request']);
+}
 
-//$uri = explode( ',', $queries['request']);
-//unset($queries['request']);
 
 $path = $_SERVER['PHP_SELF'];
 $path = ltrim($path, "/");
