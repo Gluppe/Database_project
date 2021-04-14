@@ -87,17 +87,70 @@ class APIController
         switch ($uri[0]) {
             case RESTConstants::ENDPOINT_CUSTOMER:
                 switch ($uri[1]) {
+                    case RESTConstants::ENDPOINT_PRODUCTION_PLANS:
                     case RESTConstants::ENDPOINT_ORDERS:
-                        if ($uri[1] == RESTConstants::METHOD_GET) {
+                        if ($requestMethod == RESTConstants::METHOD_GET) {
                             return true;
                         }
+                        return false;
+                    case RESTConstants::ENDPOINT_ORDER:
+                        return match ($requestMethod) {
+                            RESTConstants::METHOD_DELETE, RESTConstants::METHOD_POST, RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
+                            default => false,
+                        };
+                    default:
+                        return false;
                 }
-
             case RESTConstants::ENDPOINT_CUSTOMERREP:
+                return match ($uri[1]) {
+                    RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
+                        RESTConstants::METHOD_GET => true,
+                        default => false,
+                    },
+                    RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
+                        RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
+                        default => false,
+                    },
+                    default => false,
+                };
             case RESTConstants::ENDPOINT_PLANNER:
+                return match ($uri[1]) {
+                    RESTConstants::ENDPOINT_PRODUCTION_PLANS => match ($requestMethod) {
+                        RESTConstants::METHOD_PUT => true,
+                        default => false,
+                    },
+                    default => false,
+                };
+
             case RESTConstants::ENDPOINT_PUBLIC:
+                return match ($uri[1]) {
+                    RESTConstants::ENDPOINT_SKITYPE => match ($requestMethod) {
+                        RESTConstants::METHOD_GET => true,
+                        default => false,
+                    },
+                    default => false,
+                };
+
             case RESTConstants::ENDPOINT_SHIPPER:
+                return match ($uri[1]) {
+                    RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
+                        RESTConstants::METHOD_PUT => true,
+                        default => false,
+                    },
+                    default => false,
+                };
             case RESTConstants::ENDPOINT_STOREKEEPER:
+                return match ($uri[1]) {
+                    RESTConstants::ENDPOINT_SKI => match ($requestMethod) {
+                        RESTConstants::METHOD_PUT => true,
+                        default => false,
+                    },
+                    RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_PUT => true,
+                        default => false,
+                    },
+                    default => false,
+                };
         }
         return false;
     }
@@ -110,6 +163,7 @@ class APIController
      */
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool {
         // No payloads to test for GET methods
+        //TODO: actually implement this.
         if ($requestMethod == RESTConstants::METHOD_GET)  {
             return true;
         }
@@ -124,6 +178,7 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     public function handleRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
+        //TODO: Change entire switch case to correct endpoints.
         $endpointUri = $uri[0];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
