@@ -11,16 +11,71 @@ class APIController
      */
     public function isValidEndpoint(array $uri): bool {
         switch(strtolower($uri[0])) {
-            case RESTConstants::ENDPOINT_ORDER:
-            case RESTConstants::ENDPOINT_ORDERS:
-            case RESTConstants:: ENDPOINT_SKIS:
-            case RESTConstants:: ENDPOINT_SKI:
-            case RESTConstants:: ENDPOINT_SHIPMENT:
-            case RESTConstants:: ENDPOINT_PRODUCTIONPLAN:
-                return true;
+            case RESTConstants::ENDPOINT_CUSTOMER:
+                if($this->validCustomerEndpoint($uri[1])) return true;
+                return false;
+            case RESTConstants::ENDPOINT_CUSTOMERREP:
+                if($this->validCustomerRepEndpoint($uri[1])) return true;
+                return false;
+            case RESTConstants::ENDPOINT_PLANNER:
+                if($this->validPlannerEndpoint($uri[1])) return true;
+                return false;
+            case RESTConstants::ENDPOINT_PUBLIC:
+                if($this->validPublicEndpoint($uri[1])) return true;
+                return false;
+            case RESTConstants::ENDPOINT_SHIPPER:
+                if($this->validShipperEndpoint($uri[1])) return true;
+                return false;
+            case RESTConstants::ENDPOINT_STOREKEEPER:
+                if($this->validStorekeeperEndpoint($uri[1])) return true;
+                return false;
             default:
                 return false;
         }
+    }
+
+    public function validCustomerEndpoint(string $endpoint): bool
+    {
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_PRODUCTION_PLANS, RESTConstants::ENDPOINT_ORDER => true,
+            default => false,
+        };
+    }
+
+    public function validCustomerRepEndpoint(string $endpoint): bool {
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_ORDER => true,
+            default => false,
+        };
+    }
+
+    public function validPlannerEndpoint(string $endpoint): bool {
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_PRODUCTION_PLANS => true,
+            default => false,
+        };
+    }
+
+    public function validPublicEndpoint(string $endpoint): bool {
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_SKITYPE => true,
+            default => false,
+        };
+    }
+
+    public function validShipperEndpoint(string $endpoint): bool {
+        //TODO: Figure out what endpoint the shipper is supposed to have. Maybe order?
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_ORDER => true,
+            default => false,
+        };
+    }
+
+    public function validStorekeeperEndpoint(string $endpoint): bool {
+        return match ($endpoint) {
+            RESTConstants::ENDPOINT_SKITYPE, RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SKI => true,
+            default => false,
+        };
     }
 
     /** isValidMethod checks if the request method is valid
@@ -30,27 +85,19 @@ class APIController
      */
     public function isValidMethod(array $uri, string $requestMethod): bool {
         switch ($uri[0]) {
-            case RESTConstants::ENDPOINT_ORDERS:
-                // The only method implemented is for getting individual car resources
-                return $requestMethod == RESTConstants::METHOD_GET;
-            case RESTConstants::ENDPOINT_ORDER:
-                return match ($requestMethod) {
-                    RESTConstants::METHOD_POST, RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET, RESTConstants::METHOD_DELETE => true,
-                    default => false,
-                };
-            case RESTConstants::ENDPOINT_SKIS:
-                return $requestMethod == RESTConstants::METHOD_GET;
-            case RESTConstants::ENDPOINT_SHIPMENT:
-            case RESTConstants::ENDPOINT_SKI:
-                return match ($requestMethod) {
-                    RESTConstants::METHOD_POST, RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
-                    default => false,
-                };
-            case RESTConstants::ENDPOINT_PRODUCTIONPLAN:
-                return match ($requestMethod) {
-                    RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
-                    default => false,
-                };
+            case RESTConstants::ENDPOINT_CUSTOMER:
+                switch ($uri[1]) {
+                    case RESTConstants::ENDPOINT_ORDERS:
+                        if ($uri[1] == RESTConstants::METHOD_GET) {
+                            return true;
+                        }
+                }
+
+            case RESTConstants::ENDPOINT_CUSTOMERREP:
+            case RESTConstants::ENDPOINT_PLANNER:
+            case RESTConstants::ENDPOINT_PUBLIC:
+            case RESTConstants::ENDPOINT_SHIPPER:
+            case RESTConstants::ENDPOINT_STOREKEEPER:
         }
         return false;
     }

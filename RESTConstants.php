@@ -28,4 +28,10 @@ class RESTConstants
     const ENDPOINT_PLANNER = 'planner';
     const ENDPOINT_CUSTOMERREP = 'customer-rep';
     const ENDPOINT_STOREKEEPER = 'storekeeper';
+
+    const ENDPOINT_ORDER = 'order';
+    const ENDPOINT_ORDERS = 'orders';
+    const ENDPOINT_PRODUCTION_PLANS = "production-plans";
+    const ENDPOINT_SKITYPE = "ski-type";
+    const ENDPOINT_SKI = "ski";
 }
