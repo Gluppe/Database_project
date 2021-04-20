@@ -37,7 +37,7 @@ class APIController
     public function validCustomerEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_PRODUCTION_PLANS, RESTConstants::ENDPOINT_ORDER => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_PRODUCTION_PLAN, RESTConstants::ENDPOINT_ORDER => true,
             default => false,
         };
     }
@@ -51,7 +51,7 @@ class APIController
 
     public function validPlannerEndpoint(string $endpoint): bool {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_PRODUCTION_PLANS => true,
+            RESTConstants::ENDPOINT_PRODUCTION_PLAN => true,
             default => false,
         };
     }
@@ -64,9 +64,8 @@ class APIController
     }
 
     public function validShipperEndpoint(string $endpoint): bool {
-        //TODO: Figure out what endpoint the shipper is supposed to have. Maybe order?
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDER => true,
+            RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SHIPMENT => true,
             default => false,
         };
     }
@@ -84,10 +83,11 @@ class APIController
      * @return bool returns true if the request method is valid, and false otherwise.
      */
     public function isValidMethod(array $uri, string $requestMethod): bool {
+        //TODO: Refactor each switch case result into their own functions
         switch ($uri[0]) {
             case RESTConstants::ENDPOINT_CUSTOMER:
                 switch ($uri[1]) {
-                    case RESTConstants::ENDPOINT_PRODUCTION_PLANS:
+                    case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
                     case RESTConstants::ENDPOINT_ORDERS:
                         if ($requestMethod == RESTConstants::METHOD_GET) {
                             return true;
@@ -115,7 +115,7 @@ class APIController
                 };
             case RESTConstants::ENDPOINT_PLANNER:
                 return match ($uri[1]) {
-                    RESTConstants::ENDPOINT_PRODUCTION_PLANS => match ($requestMethod) {
+                    RESTConstants::ENDPOINT_PRODUCTION_PLAN => match ($requestMethod) {
                         RESTConstants::METHOD_PUT => true,
                         default => false,
                     },
@@ -133,8 +133,8 @@ class APIController
 
             case RESTConstants::ENDPOINT_SHIPPER:
                 return match ($uri[1]) {
-                    RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
-                        RESTConstants::METHOD_PUT => true,
+                    RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SHIPMENT => match ($requestMethod) {
+                        RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
                         default => false,
                     },
                     default => false,
@@ -162,10 +162,16 @@ class APIController
      * @return bool returns true if the payload is valid, and false otherwise.
      */
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool {
-        // No payloads to test for GET methods
         //TODO: actually implement this.
-        if ($requestMethod == RESTConstants::METHOD_GET)  {
-            return true;
+        switch($requestMethod) {
+            case RESTConstants::METHOD_GET:
+                return true;
+            case RESTConstants::METHOD_PUT:
+                return true;
+            case RESTConstants::METHOD_POST:
+                return true;
+            case RESTConstants::METHOD_DELETE:
+                return true;
         }
         return false;
     }
@@ -178,8 +184,7 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     public function handleRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
-        //TODO: Change entire switch case to correct endpoints.
-        $endpointUri = $uri[0];
+        $endpointUri = $uri[1];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
                 return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
@@ -191,8 +196,10 @@ class APIController
                 return $this->handleSkiRequest($uri, $requestMethod, $queries, $payload);
             case RESTConstants::ENDPOINT_SHIPMENT:
                 return $this->handleShipmentRequest($uri, $requestMethod, $queries, $payload);
-            case RESTConstants::ENDPOINT_PRODUCTIONPLAN:
+            case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
                 return $this->handleProductionPlanRequest($uri, $requestMethod, $queries, $payload);
+            case RESTConstants::ENDPOINT_SKITYPE:
+                return $this->handleSkiTypeRequest($uri, $requestMethod, $queries, $payload);
         }
         return array();
     }
@@ -291,7 +298,14 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     protected function handleShipmentRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
-        return array();
+        switch($requestMethod) {
+            case RESTConstants::METHOD_GET:
+                $model = new ShipmentModel();
+                return $model->getShipment($payload);
+            case RESTConstants::METHOD_POST:
+                $model = new ShipmentModel();
+                return $model->updateShipment($payload);
+        }
     }
 
     /** handleProductionPlanRequest handles what happens when the Production-Plan endpoint is used
@@ -302,6 +316,34 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     protected function handleProductionPlanRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
-        return array();
+        switch($requestMethod) {
+            case RESTConstants::METHOD_GET:
+                $model = new ProductionPlanModel();
+                return $model->getProductionPlan($payload);
+            case RESTConstants::METHOD_PUT:
+                $model = new ProductionPlanModel();
+                return $model->addProductionPlanModel($payload);
+        }
+    }
+
+    /** handleSkiTypeRequest handles what happens when the Ski-Type endpoint is used
+     * @param array $uri contains the path in an array
+     * @param string $requestMethod contains the request method used
+     * @param array $queries contains the queries used
+     * @param array $payload contains the payload
+     * @return array returns an array of the information gotten from the database
+     */
+    protected function handleSkiTypeRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
+        if ($requestMethod == RESTConstants::METHOD_GET) {
+            if(!empty($queries['model'])) {
+                $model = new SkisModel();
+                $query = explode( ',', $queries['model']);
+                return $model->getSkiTypesByModel($query);
+            } else if (!empty($queries['grip'])) {
+                $model = new SkisModel();
+                $query = explode( ',', $queries['grip']);
+                return $model->getSkiTypesByGripSystem($query);
+            }
+        }
     }
 }
