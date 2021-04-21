@@ -58,7 +58,7 @@ class APIController
 
     public function validPublicEndpoint(string $endpoint): bool {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_SKITYPE => true,
+            RESTConstants::ENDPOINT_SKITYPES => true,
             default => false,
         };
     }
@@ -72,7 +72,7 @@ class APIController
 
     public function validStorekeeperEndpoint(string $endpoint): bool {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_SKITYPE, RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SKI => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SKI => true,
             default => false,
         };
     }
@@ -124,7 +124,7 @@ class APIController
 
             case RESTConstants::ENDPOINT_PUBLIC:
                 return match ($uri[1]) {
-                    RESTConstants::ENDPOINT_SKITYPE => match ($requestMethod) {
+                    RESTConstants::ENDPOINT_SKITYPES => match ($requestMethod) {
                         RESTConstants::METHOD_GET => true,
                         default => false,
                     },
@@ -134,7 +134,7 @@ class APIController
             case RESTConstants::ENDPOINT_SHIPPER:
                 return match ($uri[1]) {
                     RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SHIPMENT => match ($requestMethod) {
-                        RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
+                        RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
                         default => false,
                     },
                     default => false,
@@ -146,7 +146,11 @@ class APIController
                         default => false,
                     },
                     RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
-                        RESTConstants::METHOD_GET, RESTConstants::METHOD_PUT => true,
+                        RESTConstants::METHOD_GET => true,
+                        default => false,
+                    },
+                    RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
                         default => false,
                     },
                     default => false,
@@ -198,7 +202,7 @@ class APIController
                 return $this->handleShipmentRequest($uri, $requestMethod, $queries, $payload);
             case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
                 return $this->handleProductionPlanRequest($uri, $requestMethod, $queries, $payload);
-            case RESTConstants::ENDPOINT_SKITYPE:
+            case RESTConstants::ENDPOINT_SKITYPES:
                 return $this->handleSkiTypeRequest($uri, $requestMethod, $queries, $payload);
         }
         return array();
