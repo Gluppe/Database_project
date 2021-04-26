@@ -22,8 +22,9 @@ class SkisModel
         foreach ($queries as $model) {
             $query = 'SELECT * FROM ski_type WHERE ski_type.model = :model';
 
-            $stmt = $this->db->query($query);
+            $stmt = $this->db->prepare($query);
             $stmt->bindValue(':model', $model);
+            $stmt->execute();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $res[] = $row;
             }
@@ -41,8 +42,9 @@ class SkisModel
         foreach($queries as $grip) {
             $query = 'SELECT * FROM ski_type WHERE ski_type.grip_system = :grip_system';
 
-            $stmt = $this->db->query($query);
+            $stmt = $this->db->prepare($query);
             $stmt->bindValue(':grip_system', $grip);
+            $stmt->execute();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $res[] = $row;
             }
