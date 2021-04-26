@@ -92,72 +92,76 @@ class APIController
     {
         switch ($uri[0]) {
             case RESTConstants::ENDPOINT_CUSTOMER:
-                return $this->validCustomerMethod($uri[1], $requestMethod);
+                return $this->validCustomerMethod($uri, $requestMethod);
             case RESTConstants::ENDPOINT_CUSTOMERREP:
-                return $this->validCustomerRepMethod($uri[1], $requestMethod);
+                return $this->validCustomerRepMethod($uri, $requestMethod);
             case RESTConstants::ENDPOINT_PLANNER:
-                return $this->validPlannerMethod($uri[1], $requestMethod);
+                return $this->validPlannerMethod($uri, $requestMethod);
             case RESTConstants::ENDPOINT_PUBLIC:
-                return $this->validPublicMethod($uri[1], $requestMethod);
+                return $this->validPublicMethod($uri, $requestMethod);
             case RESTConstants::ENDPOINT_SHIPPER:
-                return $this->validShipperMethod($uri[1], $requestMethod);
+                return $this->validShipperMethod($uri, $requestMethod);
             case RESTConstants::ENDPOINT_STOREKEEPER:
-                return $this->validStoreKeeperMethod($uri[1], $requestMethod);
+                return $this->validStoreKeeperMethod($uri, $requestMethod);
         }
         return false;
     }
 
     /** validCustomerMethod checks if the method used when accessing the customer endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
-     * @param string $requestMethod the method used in the request.
+     * @param array $uri all the parts of the endpoint url in an array
+     * @param string $requestMethod the method used in the request
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validCustomerMethod(string $uri, string $requestMethod): bool
+    public function validCustomerMethod(array $uri, string $requestMethod): bool
     {
-        switch ($uri) {
+        switch ($uri[1]) {
             case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
             case RESTConstants::ENDPOINT_ORDERS:
-                if ($requestMethod == RESTConstants::METHOD_GET) {
-                    return true;
+                if(empty($uri[2])) {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
+                        default => false,
+                    };
+                } else {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_DELETE, RESTConstants::METHOD_POST, RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
+                        default => false,
+                    };
                 }
-                return false;
-            case RESTConstants::ENDPOINT_ORDER:
-                return match ($requestMethod) {
-                    RESTConstants::METHOD_DELETE, RESTConstants::METHOD_POST, RESTConstants::METHOD_PUT, RESTConstants::METHOD_GET => true,
-                    default => false,
-                };
             default:
                 return false;
         }
     }
     /** validCustomerRepMethod checks if the method used when accessing the customer rep endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
-     * @param string $requestMethod the method used in the request.
+     * @param array $uri all the parts of the endpoint url in an array
+     * @param string $requestMethod the method used in the request
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validCustomerRepMethod(string $uri, string $requestMethod): bool
+    public function validCustomerRepMethod(array $uri, string $requestMethod): bool
     {
-        return match ($uri) {
-            RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
-                RESTConstants::METHOD_GET => true,
-                default => false,
-            },
-            RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
-                RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
-                default => false,
-            },
-            default => false,
-        };
+        if($uri[1] == RESTConstants::ENDPOINT_ORDERS) {
+            if(empty($uri[2])) {
+                return match ($requestMethod) {
+                    RESTConstants::METHOD_GET => true,
+                    default => false,
+                };
+            } else {
+                return match ($requestMethod) {
+                    RESTConstants::METHOD_POST => true,
+                    default => false,
+                };
+            }
+        }
     }
     /** validPlannerMethod checks if the method used when accessing the planner endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
+     * @param array $uri all the parts of the endpoint url in an array
      * @param string $requestMethod the method used in the request.
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validPlannerMethod(string $uri, string $requestMethod): bool {
-        return match ($uri) {
+    public function validPlannerMethod(array $uri, string $requestMethod): bool {
+        return match ($uri[1]) {
             RESTConstants::ENDPOINT_PRODUCTION_PLAN => match ($requestMethod) {
-                RESTConstants::METHOD_PUT => true,
+                RESTConstants::METHOD_POST => true,
                 default => false,
             },
             default => false,
@@ -165,12 +169,12 @@ class APIController
     }
 
     /** validPublicMethod checks if the method used when accessing the public endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
+     * @param array $uri all the parts of the endpoint url in an array
      * @param string $requestMethod the method used in the request.
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validPublicMethod(string $uri, string $requestMethod): bool {
-        return match ($uri) {
+    public function validPublicMethod(array $uri, string $requestMethod): bool {
+        return match ($uri[1]) {
             RESTConstants::ENDPOINT_SKITYPES => match ($requestMethod) {
                 RESTConstants::METHOD_GET => true,
                 default => false,
@@ -180,13 +184,13 @@ class APIController
     }
 
     /** validShipperMethod checks if the method used when accessing the shipper endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
+     * @param array $uri all the parts of the endpoint url in an array
      * @param string $requestMethod the method used in the request.
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validShipperMethod(string $uri, string $requestMethod): bool {
-        return match ($uri) {
-            RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SHIPMENT => match ($requestMethod) {
+    public function validShipperMethod(array $uri, string $requestMethod): bool {
+        return match ($uri[1]) {
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SHIPMENT => match ($requestMethod) {
                 RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
                 default => false,
             },
@@ -195,26 +199,30 @@ class APIController
     }
 
     /** validStorekeeperMethod checks if the method used when accessing the storekeeper endpoint is correct
-     * @param string $uri the part of the customer endpoint accessed
+     * @param array $uri all the parts of the endpoint url in an array
      * @param string $requestMethod the method used in the request.
      * @return bool returns true if the method is correct, false otherwise
      */
-    public function validStorekeeperMethod(string $uri, string $requestMethod): bool {
-        return match ($uri) {
-            RESTConstants::ENDPOINT_SKI => match ($requestMethod) {
-                RESTConstants::METHOD_PUT => true,
-                default => false,
-            },
-            RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
-                RESTConstants::METHOD_GET => true,
-                default => false,
-            },
-            RESTConstants::ENDPOINT_ORDER => match ($requestMethod) {
-                RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
-                default => false,
-            },
-            default => false,
-        };
+    public function validStorekeeperMethod(array $uri, string $requestMethod): bool {
+
+        switch($uri[1]) {
+            case RESTConstants::ENDPOINT_SKI:
+
+            case RESTConstants::ENDPOINT_ORDERS:
+                if(empty($uri[2])) {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_GET => true,
+                        default => false,
+                    };
+                } else {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
+                        default => false,
+                    };
+                }
+            default:
+                return false;
+        }
     }
 
 
@@ -298,21 +306,16 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrder();
+                return $model->getOrder($queries);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 $updated = $model->updateOrder($payload);
                 $res = array();
                 $res[] = $updated;
                 return $res;
-            case RESTConstants::METHOD_PUT:
-                $model = new OrdersModel();
-                $res = array();
-                $res[] = $model->addOrder($payload);
-                return $res;
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
-                return $model->deleteOrder();
+                $model->deleteOrder($queries[0]);
         }
 
         return array();
