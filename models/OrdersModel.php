@@ -77,7 +77,7 @@ class OrdersModel {
             //$stmt->bindValue(":customer_id", $customerID);
             $stmt->execute();
             $success = true;
-        }catch (\mysql_xdevapi\Exception){
+        }catch (\mysql_xdevapi\Exception){+
             echo "Something went wrong with update order";
         }
         return $success;
