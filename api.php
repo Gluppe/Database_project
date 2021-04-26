@@ -8,14 +8,13 @@ header('Content-Type: application/json');
 $queries = array();
 if (!empty($_SERVER['QUERY_STRING'])) {
     parse_str($_SERVER['QUERY_STRING'], $queries);
-    $querySince = explode( ',', $queries['since']);
-    unset($queries['request']);
 }
 
 
-$path = $_SERVER['PHP_SELF'];
-$path = ltrim($path, "/");
-$uri = explode( '/', $path);
+
+$uri = $_SERVER['PHP_SELF'];
+$uri = ltrim($uri, "/");
+$uri = explode( '/', $uri);
 
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -34,16 +33,19 @@ $controller = new APIController();
 // Check that the request is valid
 if (!$controller->isValidEndpoint($uri)) {
     // Endpoint not recognised
+    error_log("Not valid endpoint");
     http_response_code(RESTConstants::HTTP_NOT_FOUND);
     return;
 }
 if (!$controller->isValidMethod($uri, $requestMethod)) {
     // Method not supported
+    error_log("Not valid method");
     http_response_code(RESTConstants::HTTP_METHOD_NOT_ALLOWED);
     return;
 }
 if (!$controller->isValidPayload($uri, $requestMethod, $payload)) {
     // Payload is incorrectly formatted
+    error_log("Not valid payload");
     http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     return;
 }
