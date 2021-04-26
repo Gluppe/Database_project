@@ -36,7 +36,6 @@ class SkisModel
      * Index 0 = grip_system
      * @return array Array of skis with this grip system
      */
-
     public function getSkiTypesByGripSystem(array $queries): array {
         $res = array();
         foreach($queries as $grip) {
