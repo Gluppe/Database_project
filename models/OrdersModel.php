@@ -78,17 +78,18 @@ class OrdersModel {
         $success = false;
         try {
             $this->db->beginTransaction();
-            $stmt = $this->db->prepare('UPDATE `order` SET total_price = :total_price, `state` = `:state`, reference_to_larger_order = :reference_to_larger_order, shipment_number = :shipment_number, customer_id = :customer_id WHERE order_number like :order_number');
+            $stmt = $this->db->prepare('UPDATE `order` SET total_price = :total_price, `state` = :state, reference_to_larger_order = :reference_to_larger_order, shipment_number = :shipment_number WHERE order_number like :order_number');
             $stmt->bindValue(":order_number", $payload[0]);
             $stmt->bindValue(":total_price", $payload[1]);
             $stmt->bindValue(":state", $payload[2]);
             $stmt->bindValue(":reference_to_larger_order", $payload[3]);
             $stmt->bindValue(":shipment_number", $payload[4]);
-            //$stmt->bindValue(":customer_id", $customerID);
+            //$stmt->bindValue(":customer_id", $payload[5]);
             $stmt->execute();
             $this->db->commit();
             $success = true;
         }catch (Throwable $e){
+            print("lol");
             $this->db->rollBack();
             throw $e;
         }
@@ -142,7 +143,7 @@ class OrdersModel {
         $success = false;
         try {
             $this->db->beginTransaction();
-            $stmt = $this->db->prepare('DELETE FROM `order` WHERE `order`.order_number EQUALS :order_number');
+            $stmt = $this->db->prepare('DELETE FROM `order` WHERE `order`.order_number = :order_number');
             $stmt->bindValue(":order_number", $orderNumber);
             $stmt->execute();
             $this->db->commit();

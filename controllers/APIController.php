@@ -38,7 +38,7 @@ class APIController
     public function validCustomerEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_PRODUCTION_PLAN, RESTConstants::ENDPOINT_ORDER => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_PRODUCTION_PLAN => true,
             default => false,
         };
     }
@@ -46,7 +46,7 @@ class APIController
     public function validCustomerRepEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_ORDER => true,
+            RESTConstants::ENDPOINT_ORDERS => true,
             default => false,
         };
     }
@@ -70,7 +70,7 @@ class APIController
     public function validShipperEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SHIPMENT => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SHIPMENT => true,
             default => false,
         };
     }
@@ -78,7 +78,7 @@ class APIController
     public function validStorekeeperEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_ORDER, RESTConstants::ENDPOINT_SKI => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SKI => true,
             default => false,
         };
     }
@@ -250,11 +250,11 @@ class APIController
         $endpointUri = $uri[1];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
-                return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
-            case RESTConstants::ENDPOINT_ORDER:
-                return $this->handleOrderRequest($uri, $requestMethod, $queries, $payload);
-            case RESTConstants::ENDPOINT_SKIS:
-                return $this->handleSkisRequest($uri, $requestMethod, $queries, $payload);
+                if(empty($uri[2])) {
+                    return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
+                } else {
+                    return $this->handleOrderRequest($uri, $requestMethod, $queries, $payload);
+                }
             case RESTConstants::ENDPOINT_SKI:
                 return $this->handleSkiRequest($uri, $requestMethod, $queries, $payload);
             case RESTConstants::ENDPOINT_SHIPMENT:
@@ -275,18 +275,24 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     protected function handleOrdersRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
-        if ($requestMethod == RESTConstants::METHOD_GET) {
-            $model = new OrdersModel();
-            return $model->getOrders();
+        switch($requestMethod) {
+            case RESTConstants::METHOD_GET:
+                $model = new OrdersModel();
+                return $model->getOrders();
+            case RESTConstants::METHOD_POST:
+                $model = new OrdersModel();
+                $model->addOrder($payload);
         }
         return array();
     }
+
     /** handleOrderRequest handles what happens when the Order endpoint is used
      * @param array $uri contains the path in an array
      * @param string $requestMethod contains the request method used
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
+     * @throws Throwable
      */
     protected function handleOrderRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
