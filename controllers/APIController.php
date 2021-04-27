@@ -235,16 +235,35 @@ class APIController
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool {
         //TODO: actually implement this.
         switch($requestMethod) {
+            case RESTConstants::METHOD_PUT:
+            case RESTConstants::METHOD_DELETE:
             case RESTConstants::METHOD_GET:
                 return true;
-            case RESTConstants::METHOD_PUT:
-                return true;
             case RESTConstants::METHOD_POST:
-                return true;
-            case RESTConstants::METHOD_DELETE:
-                return true;
+                return $this->isValidPostPayload($uri, $payload);
         }
         return false;
+    }
+
+    public function isValidPostPayload(array $uri, array $payload): bool{
+    switch ($uri[0]) {
+        case RESTConstants::ENDPOINT_CUSTOMER:
+            switch($uri[1]) {
+                case RESTConstants::ENDPOINT_ORDERS:
+                    foreach ($payload as $ski_type_id => $quantity) {
+                        $model = new SkisModel();
+                        if(!$model->skiTypeExist($ski_type_id)) {
+                            return false;
+                        }
+                        if(!is_int($quantity)) {
+                            return false;
+                        }
+                    }
+                    return true;
+            }
+        default:
+            return false;
+    }
     }
 
     /** handleRequest checks what endpoint is used, and uses the correct function for each endpoint
@@ -258,11 +277,10 @@ class APIController
         $endpointUri = $uri[1];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
-                if(empty($uri[2])) {
-                    if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                        print("A customer_id query is needed to see your orders");
-                        return array();
-                    }
+                if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && !empty($queries['customer_id'])) {
+                    print("A customer_id query is needed to see your orders");
+                    return array();
+                } else if(empty($uri[2])) {
                     return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
                 } else {
                     return $this->handleOrderRequest($uri, $requestMethod, $queries, $payload);

@@ -89,7 +89,6 @@ class OrdersModel {
             $this->db->commit();
             $success = true;
         }catch (Throwable $e){
-            print("lol");
             $this->db->rollBack();
             throw $e;
         }
