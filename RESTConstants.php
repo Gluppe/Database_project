@@ -29,7 +29,6 @@ class RESTConstants
     const ENDPOINT_CUSTOMERREP = 'customer-rep';
     const ENDPOINT_STOREKEEPER = 'storekeeper';
 
-    const ENDPOINT_ORDER = 'order';
     const ENDPOINT_ORDERS = 'orders';
     const ENDPOINT_PRODUCTION_PLAN = "production-plan";
     const ENDPOINT_SKITYPES = "ski-types";

@@ -22,8 +22,9 @@ class SkisModel
         foreach ($queries as $model) {
             $query = 'SELECT * FROM ski_type WHERE ski_type.model = :model';
 
-            $stmt = $this->db->query($query);
+            $stmt = $this->db->prepare($query);
             $stmt->bindValue(':model', $model);
+            $stmt->execute();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $res[] = $row;
             }
@@ -41,8 +42,9 @@ class SkisModel
         foreach($queries as $grip) {
             $query = 'SELECT * FROM ski_type WHERE ski_type.grip_system = :grip_system';
 
-            $stmt = $this->db->query($query);
+            $stmt = $this->db->prepare($query);
             $stmt->bindValue(':grip_system', $grip);
+            $stmt->execute();
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $res[] = $row;
             }
@@ -134,7 +136,18 @@ class SkisModel
 
     }
 
+    /** Checks if a ski type exists
+     * @param int $ski_type_id the id of the ski type
+     */
+    public function skiTypeExist(int $ski_type_id): bool {
 
+        $query = 'SELECT COUNT(1) FROM ski_type WHERE ID = :ski_type_id;';
 
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':ski_type_id', $ski_type_id);
+        $stmt->execute();
 
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $res["COUNT(1)"];
+    }
 }
