@@ -123,17 +123,23 @@ class SkisModel
      * index 1 = order_no
      * index 2 = ski_type_id
      */
-    public function addSki(array $payload) {
-
-        $query = 'INSERT INTO ski (available, order_no, ski_type_id) VALUES
+    public function addSki(array $payload): bool{
+        $success = false;
+        try {
+            $this->db->beginTransaction();
+            $query = 'INSERT INTO ski (available, order_no, ski_type_id) VALUES
         (:available, :order_no, :ski_type_id)';
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':available', 0);
-        $stmt->bindValue(':order_no', 0);
-        $stmt->bindValue(':ski_type_id', $payload[0]);
-        $stmt->execute();
-
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':available', 0);
+            $stmt->bindValue(':order_no', null);
+            $stmt->bindValue(':ski_type_id', $payload['ski_type_id']);
+            $stmt->execute();
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+        return $success;
     }
 
     /** Checks if a ski type exists
