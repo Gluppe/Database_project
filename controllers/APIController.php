@@ -277,7 +277,7 @@ class APIController
         $endpointUri = $uri[1];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
-                if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && !empty($queries['customer_id'])) {
+                if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
                     print("A customer_id query is needed to see your orders");
                     return array();
                 } else if(empty($uri[2])) {
