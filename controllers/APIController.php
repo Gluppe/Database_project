@@ -390,16 +390,23 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new SkisModel();
-                return $model->getSki($queries);
+                if(empty($uri[2])) {
+                    return $model->getSkis();
+                } else if((int)$uri[2] != 0){
+                    return $model->getSki($uri[2]);
+                } else {
+                    return array();
+                }
+
             case RESTConstants::METHOD_POST:
                 $model = new SkisModel();
                 $success = $model->addSki($payload);
                 if ($success) {
-                    print("Ski successfully added5");
+                    print("Ski successfully added\n");
                     return array(true);
                 } else {
-                    print("Something went wrong, ski not added");
-                    return array(true);
+                    print("Something went wrong, ski not added\n");
+                    return array(false);
                 }
         }
 
