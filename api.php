@@ -2,7 +2,6 @@
 require_once 'RESTConstants.php';
 require_once 'controllers/APIController.php';
 
-header('Content-Type: application/json');
 
 // Parse request parameters
 $queries = array();
@@ -54,26 +53,29 @@ try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
 
     if (count($res) == 0) {
+        print("No information available");
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
-    }
-    switch($requestMethod) {
-        case RESTConstants::METHOD_GET:
-            http_response_code(RESTConstants::HTTP_OK);
-            print(json_encode($res));
-            break;
-        case RESTConstants::METHOD_POST:
-            http_response_code(RESTConstants::HTTP_OK);
-            print("Successfully Updated");
-            break;
-        case RESTConstants::METHOD_PUT:
-            http_response_code(RESTConstants::HTTP_OK);
-            print("Successfully Added");
-            break;
-        case RESTConstants::METHOD_DELETE:
-            http_response_code(RESTConstants::HTTP_OK);
-            print("Successfully Deleted");
-            break;
+    } else {
+        header('Content-Type: application/json');
+        switch ($requestMethod) {
+            case RESTConstants::METHOD_GET:
+                http_response_code(RESTConstants::HTTP_OK);
+                print(json_encode($res));
+                break;
+            case RESTConstants::METHOD_POST:
+                http_response_code(RESTConstants::HTTP_OK);
+                print("Successfully Updated");
+                break;
+            case RESTConstants::METHOD_PUT:
+                http_response_code(RESTConstants::HTTP_OK);
+                print("Successfully Added");
+                break;
+            case RESTConstants::METHOD_DELETE:
+                http_response_code(RESTConstants::HTTP_OK);
+                print("Successfully Deleted");
+                break;
 
+        }
     }
 
 } catch (Exception $e) {

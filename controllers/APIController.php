@@ -2,6 +2,7 @@
 require_once 'RESTConstants.php';
 require_once 'models/OrdersModel.php';
 require_once 'models/SkisModel.php';
+require_once 'models/ShipmentsModel.php';
 
 class APIController
 {
@@ -116,6 +117,10 @@ class APIController
     {
         switch ($uri[1]) {
             case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
+                return match ($requestMethod) {
+                    RESTConstants::METHOD_GET => true,
+                    default => false,
+                };
             case RESTConstants::ENDPOINT_ORDERS:
                 if(empty($uri[2])) {
                     return match ($requestMethod) {
@@ -152,6 +157,7 @@ class APIController
                 };
             }
         }
+        return false;
     }
     /** validPlannerMethod checks if the method used when accessing the planner endpoint is correct
      * @param array $uri all the parts of the endpoint url in an array
@@ -207,16 +213,15 @@ class APIController
 
         switch($uri[1]) {
             case RESTConstants::ENDPOINT_SKI:
-
             case RESTConstants::ENDPOINT_ORDERS:
                 if(empty($uri[2])) {
                     return match ($requestMethod) {
-                        RESTConstants::METHOD_GET => true,
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
                         default => false,
                     };
                 } else {
                     return match ($requestMethod) {
-                        RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
+                        RESTConstants::METHOD_GET => true,
                         default => false,
                     };
                 }
@@ -234,15 +239,11 @@ class APIController
      */
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool {
         //TODO: actually implement this.
-        switch($requestMethod) {
-            case RESTConstants::METHOD_PUT:
-            case RESTConstants::METHOD_DELETE:
-            case RESTConstants::METHOD_GET:
-                return true;
-            case RESTConstants::METHOD_POST:
-                return $this->isValidPostPayload($uri, $payload);
-        }
-        return false;
+        return match ($requestMethod) {
+            RESTConstants::METHOD_PUT, RESTConstants::METHOD_DELETE, RESTConstants::METHOD_GET => true,
+            RESTConstants::METHOD_POST => $this->isValidPostPayload($uri, $payload),
+            default => false,
+        };
     }
 
     public function isValidPostPayload(array $uri, array $payload): bool{
@@ -261,9 +262,20 @@ class APIController
                     }
                     return true;
             }
+            return false;
+        case RESTConstants::ENDPOINT_STOREKEEPER:
+            switch($uri[1]) {
+                case RESTConstants::ENDPOINT_SKI:
+                    if(empty($payload['ski_type_id']) || (int)$payload['ski_type_id'] == 0) {
+                       return false;
+                    } else {
+                        return true;
+                    }
+            }
+            return false;
         default:
             return false;
-    }
+        }
     }
 
     /** handleRequest checks what endpoint is used, and uses the correct function for each endpoint
@@ -272,6 +284,7 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
+     * @throws Throwable
      */
     public function handleRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         $endpointUri = $uri[1];
@@ -303,6 +316,7 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
+     * @throws Throwable
      */
     protected function handleOrdersRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
@@ -337,7 +351,14 @@ class APIController
                 return $res;
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
-                $model->deleteOrder($queries[0]);
+                $success = $model->deleteOrder($uri[2]);
+                if($success) {
+                    print("the order was successfully deleted\n");
+                    return array(true);
+                } else {
+                    print("Something went wrong, the order was not deleted\n");
+                    return array(true);
+                }
         }
 
         return array();
@@ -369,16 +390,17 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new SkisModel();
-                return $model->getSki();
+                return $model->getSki($queries);
             case RESTConstants::METHOD_POST:
                 $model = new SkisModel();
-                $updated = $model->updateSki($payload);
-                $res = array();
-                $res[] = $updated;
-                return $res;
-            case RESTConstants::METHOD_PUT:
-                $model = new SkisModel();
-                return $model->addSki($payload);
+                $success = $model->addSki($payload);
+                if ($success) {
+                    print("Ski successfully added5");
+                    return array(true);
+                } else {
+                    print("Something went wrong, ski not added");
+                    return array(true);
+                }
         }
 
         return array();
@@ -394,12 +416,18 @@ class APIController
     protected function handleShipmentRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
-                $model = new ShipmentModel();
-                return $model->getShipment($payload);
+                $model = new ShipmentsModel();
+                return $model->getShipment($queries);
             case RESTConstants::METHOD_POST:
-                $model = new ShipmentModel();
-                return $model->updateShipment($payload);
+                if(!empty($uri[2])) {
+                    $model = new ShipmentsModel();
+                    return $model->updateShipment($payload);
+                } else {
+                    print("Shipment number must be specifed");
+                }
+                return array(true);
         }
+        return array();
     }
 
     /** handleProductionPlanRequest handles what happens when the Production-Plan endpoint is used
@@ -414,7 +442,7 @@ class APIController
             case RESTConstants::METHOD_GET:
                 $model = new ProductionPlanModel();
                 return $model->getProductionPlan($payload);
-            case RESTConstants::METHOD_PUT:
+            case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();
                 return $model->addProductionPlanModel($payload);
         }
