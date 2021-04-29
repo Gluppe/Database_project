@@ -32,7 +32,6 @@ class RESTConstants
     const ENDPOINT_ORDERS = 'orders';
     const ENDPOINT_PRODUCTION_PLAN = "production-plan";
     const ENDPOINT_SKITYPES = "ski-types";
-    const ENDPOINT_SKI = "ski";
     const ENDPOINT_SKIS = "skis";
     const ENDPOINT_SHIPMENT = "shipment";
 }

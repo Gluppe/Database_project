@@ -79,7 +79,7 @@ class APIController
     public function validStorekeeperEndpoint(string $endpoint): bool
     {
         return match ($endpoint) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SKI => true,
+            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SKIS => true,
             default => false,
         };
     }
@@ -212,7 +212,7 @@ class APIController
     public function validStorekeeperMethod(array $uri, string $requestMethod): bool {
 
         switch($uri[1]) {
-            case RESTConstants::ENDPOINT_SKI:
+            case RESTConstants::ENDPOINT_SKIS:
             case RESTConstants::ENDPOINT_ORDERS:
                 if(empty($uri[2])) {
                     return match ($requestMethod) {
@@ -265,7 +265,7 @@ class APIController
             return false;
         case RESTConstants::ENDPOINT_STOREKEEPER:
             switch($uri[1]) {
-                case RESTConstants::ENDPOINT_SKI:
+                case RESTConstants::ENDPOINT_SKIS:
                     if(empty($payload['ski_type_id']) || (int)$payload['ski_type_id'] == 0) {
                        return false;
                     } else {
@@ -298,8 +298,8 @@ class APIController
                 } else {
                     return $this->handleOrderRequest($uri, $requestMethod, $queries, $payload);
                 }
-            case RESTConstants::ENDPOINT_SKI:
-                return $this->handleSkiRequest($uri, $requestMethod, $queries, $payload);
+            case RESTConstants::ENDPOINT_SKIS:
+                return $this->handleSkisRequest($uri, $requestMethod, $queries, $payload);
             case RESTConstants::ENDPOINT_SHIPMENT:
                 return $this->handleShipmentRequest($uri, $requestMethod, $queries, $payload);
             case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
@@ -364,7 +364,8 @@ class APIController
         return array();
     }
 
-    /** handleSkisRequest handles what happens when the Skis endpoint is used
+
+    /** handleSkisRequest handles what happens when the Ski endpoint is used
      * @param array $uri contains the path in an array
      * @param string $requestMethod contains the request method used
      * @param array $queries contains the queries used
@@ -372,21 +373,6 @@ class APIController
      * @return array returns an array of the information gotten from the database
      */
     protected function handleSkisRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
-        if ($requestMethod == RESTConstants::METHOD_GET) {
-            $model = new SkisModel();
-            return $model->getSkis();
-        }
-        return array();
-    }
-
-    /** handleSkiRequest handles what happens when the Ski endpoint is used
-     * @param array $uri contains the path in an array
-     * @param string $requestMethod contains the request method used
-     * @param array $queries contains the queries used
-     * @param array $payload contains the payload
-     * @return array returns an array of the information gotten from the database
-     */
-    protected function handleSkiRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new SkisModel();
