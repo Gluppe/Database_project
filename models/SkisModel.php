@@ -16,7 +16,8 @@ class SkisModel
      * Index 0 = model
      * @return array An array of skis of this model
      */
-    public function getSkiTypesByModel(array $queries): array {
+    public function getSkiTypesByModel(array $queries): array
+    {
         $res = array();
 
         foreach ($queries as $model) {
@@ -37,9 +38,10 @@ class SkisModel
      * Index 0 = grip_system
      * @return array Array of skis with this grip system
      */
-    public function getSkiTypesByGripSystem(array $queries): array {
+    public function getSkiTypesByGripSystem(array $queries): array
+    {
         $res = array();
-        foreach($queries as $grip) {
+        foreach ($queries as $grip) {
             $query = 'SELECT * FROM ski_type WHERE ski_type.grip_system = :grip_system';
 
             $stmt = $this->db->prepare($query);
@@ -58,14 +60,15 @@ class SkisModel
      * table
      * @return array array of all the skis
      */
-    public function getSkis(): array {
+    public function getSkis(): array
+    {
         $res = array();
 
         $query = 'SELECT ski.*, ski_type.* FROM ski INNER JOIN ski_type ON ski.ski_type_id = ski_type.ID';
 
         $stmt = $this->db->query($query);
 
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $res[] = $row;
         }
         return $res;
@@ -77,7 +80,8 @@ class SkisModel
      * Index 1 = production_number
      * @return array single ski returned as an array
      */
-    public function getSki(array $payload): array {
+    public function getSki(array $payload): array
+    {
         $res = array();
 
         $query = 'SELECT ski.*, ski_type.* FROM ski 
@@ -88,7 +92,7 @@ class SkisModel
         $stmt->bindValue(':production_number', $payload[0]);
         $stmt->execute();
 
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $res[] = $row;
         }
         return $res;
@@ -102,19 +106,23 @@ class SkisModel
      * index 1 = order_no
      * @return bool Returns if the update function was sucsessful enough
      */
-    public function updateSki(array $payload) : bool {
+    public function updateSki(array $payload): bool
+    {
 
-            $success = false;
-            try {$stmt = $this->db->prepare('UPDATE ski SET  available = :available, order_no = :order_no WHERE production_number LIKE production_number');
-                $stmt->bindValue(":available", $payload[0]);
-                $stmt->bindValue(":order_no", $payload[1]);
-                $stmt->execute();
-                $success = true;
-            }catch (\mysql_xdevapi\Exception){
-                echo "Something went wrong with update ski";
-            }
-            return $success;
+        $success = false;
+        try {
+            $this->db->beginTransaction();
+            $stmt = $this->db->prepare('UPDATE ski SET  available = :available, order_no = :order_no WHERE production_number LIKE production_number');
+            $stmt->bindValue(":available", $payload['available']);
+            $stmt->bindValue(":order_no", $payload['order_number']);
+            $stmt->execute();
+            $success = true;
+        } catch (Throwable $e) {
+            $this->db->rollBack();
+            throw $e;
         }
+        return $success;
+    }
 
     /**
      * A function for adding a new ski using an insert into SQL statement
@@ -123,7 +131,8 @@ class SkisModel
      * index 1 = order_no
      * index 2 = ski_type_id
      */
-    public function addSki(array $payload): bool{
+    public function addSki(array $payload): bool
+    {
         $success = false;
         try {
             $this->db->beginTransaction();
@@ -131,7 +140,7 @@ class SkisModel
         (:available, :order_no, :ski_type_id)';
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(':available', 0);
+            $stmt->bindValue(':available', 1);
             $stmt->bindValue(':order_no', null);
             $stmt->bindValue(':ski_type_id', $payload['ski_type_id']);
             $stmt->execute();
@@ -145,7 +154,8 @@ class SkisModel
     /** Checks if a ski type exists
      * @param int $ski_type_id the id of the ski type
      */
-    public function skiTypeExist(int $ski_type_id): bool {
+    public function skiTypeExist(int $ski_type_id): bool
+    {
 
         $query = 'SELECT COUNT(1) FROM ski_type WHERE ID = :ski_type_id;';
 
