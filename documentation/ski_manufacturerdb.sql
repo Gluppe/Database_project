@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2021 at 08:29 PM
+-- Generation Time: Apr 29, 2021 at 10:31 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -45,16 +45,6 @@ INSERT INTO `customer` (`ID`, `name`, `start_date`, `end_date`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `customer_representative`
---
-
-CREATE TABLE `customer_representative` (
-  `employee_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `employee`
 --
 
@@ -62,7 +52,8 @@ CREATE TABLE `employee` (
   `ID` int(11) NOT NULL,
   `department` varchar(55) NOT NULL,
   `name` varchar(55) NOT NULL,
-  `manufacturer_ID` int(11) NOT NULL
+  `manufacturer_ID` int(11) NOT NULL,
+  `roleFlag` enum('Customer Representative','Shopkeeper','Production Planner') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -145,18 +136,7 @@ INSERT INTO `order_skis` (`ski_type_id`, `quantity`, `order_number`) VALUES
 
 CREATE TABLE `production_plan` (
   `ID` int(11) NOT NULL,
-  `month` date NOT NULL,
-  `planner_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `production_planner`
---
-
-CREATE TABLE `production_planner` (
-  `employee_id` int(11) NOT NULL
+  `month` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -193,16 +173,6 @@ CREATE TABLE `shipments` (
 
 INSERT INTO `shipments` (`shipment_number`, `store_name`, `shipping_address`, `scheduled_pickup_date`, `status`, `driver_id`, `transporter_company_id`) VALUES
 (100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `shopkeeper`
---
-
-CREATE TABLE `shopkeeper` (
-  `employee_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -268,6 +238,19 @@ CREATE TABLE `team_skier` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transition_history`
+--
+
+CREATE TABLE `transition_history` (
+  `transition_history_id` int(11) NOT NULL,
+  `order_number` int(11) NOT NULL,
+  `state_change` varchar(50) NOT NULL,
+  `datetime` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `transporter`
 --
 
@@ -292,12 +275,6 @@ INSERT INTO `transporter` (`company_id`, `company_name`) VALUES
 --
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`ID`);
-
---
--- Indexes for table `customer_representative`
---
-ALTER TABLE `customer_representative`
-  ADD PRIMARY KEY (`employee_id`);
 
 --
 -- Indexes for table `employee`
@@ -340,14 +317,7 @@ ALTER TABLE `order_skis`
 -- Indexes for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  ADD PRIMARY KEY (`ID`),
-  ADD UNIQUE KEY `planners` (`planner_id`);
-
---
--- Indexes for table `production_planner`
---
-ALTER TABLE `production_planner`
-  ADD PRIMARY KEY (`employee_id`);
+  ADD PRIMARY KEY (`ID`);
 
 --
 -- Indexes for table `production_skis`
@@ -364,12 +334,6 @@ ALTER TABLE `shipments`
   ADD UNIQUE KEY `driver_id` (`driver_id`,`transporter_company_id`),
   ADD UNIQUE KEY `shipment_number` (`shipment_number`),
   ADD KEY `transporter_company_id` (`transporter_company_id`);
-
---
--- Indexes for table `shopkeeper`
---
-ALTER TABLE `shopkeeper`
-  ADD PRIMARY KEY (`employee_id`);
 
 --
 -- Indexes for table `ski`
@@ -390,6 +354,13 @@ ALTER TABLE `ski_type`
 --
 ALTER TABLE `team_skier`
   ADD PRIMARY KEY (`customer_id`);
+
+--
+-- Indexes for table `transition_history`
+--
+ALTER TABLE `transition_history`
+  ADD PRIMARY KEY (`transition_history_id`),
+  ADD KEY `order_number` (`order_number`);
 
 --
 -- Indexes for table `transporter`
@@ -455,12 +426,6 @@ ALTER TABLE `transporter`
 --
 
 --
--- Constraints for table `customer_representative`
---
-ALTER TABLE `customer_representative`
-  ADD CONSTRAINT `customer_representative_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `franchise`
 --
 ALTER TABLE `franchise`
@@ -489,18 +454,6 @@ ALTER TABLE `order_skis`
   ADD CONSTRAINT `order_skis_ibfk_2` FOREIGN KEY (`order_number`) REFERENCES `order` (`order_number`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `production_plan`
---
-ALTER TABLE `production_plan`
-  ADD CONSTRAINT `production_plan_ibfk_1` FOREIGN KEY (`planner_id`) REFERENCES `production_planner` (`employee_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Constraints for table `production_planner`
---
-ALTER TABLE `production_planner`
-  ADD CONSTRAINT `production_planner_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `production_skis`
 --
 ALTER TABLE `production_skis`
@@ -514,12 +467,6 @@ ALTER TABLE `shipments`
   ADD CONSTRAINT `shipments_ibfk_1` FOREIGN KEY (`transporter_company_id`) REFERENCES `transporter` (`company_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
--- Constraints for table `shopkeeper`
---
-ALTER TABLE `shopkeeper`
-  ADD CONSTRAINT `shopkeeper_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `ski`
 --
 ALTER TABLE `ski`
@@ -531,6 +478,12 @@ ALTER TABLE `ski`
 --
 ALTER TABLE `team_skier`
   ADD CONSTRAINT `team_skier_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`ID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `transition_history`
+--
+ALTER TABLE `transition_history`
+  ADD CONSTRAINT `transition_history_ibfk_1` FOREIGN KEY (`order_number`) REFERENCES `order` (`order_number`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
