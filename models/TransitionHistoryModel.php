@@ -17,12 +17,10 @@ class TransitionHistoryModel{
     public function addTransitionHistory(int $orderNumber, String $state) {
         try {
             $this->db->beginTransaction();
-            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change) UPDATE table SET date = GETDATE()
+            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)
                     WHERE order_number = :order_number';
 
-            $query2 = 'SELECT `state` FROM `order` WHERE order_number = :order_number';
-
-            $previousState = $this->db->prepare($query2);
+            $previousState = $this->getCurrentOrderState($orderNumber);
 
             $stmt = $this->db->prepare($query1);
             $stmt->bindValue("state_change", $previousState . " -> " . $state);
@@ -32,6 +30,19 @@ class TransitionHistoryModel{
             $this->db->rollBack();
             throw $e;
         }
+    }
+
+    public function getCurrentOrderState(int $orderNumber): array {
+        $res = array();
+
+        $query = 'SELECT `state` FROM `order` WHERE order_number = :order_number';
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue("order_number", $orderNumber);
+
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
     }
 
 }
