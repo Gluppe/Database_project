@@ -28,18 +28,22 @@ class ProductionPlanModel
         }
     }
 
-    /**
-     * @return array
+    /** gets the production plan and all skis that are to be produced.
+     * @param string $production_plan_id the production plan id
+     * @return array consists of the production plan id and an array of the daily amount of skis to be produced
      */
-    public function getProductionPlan(): array {
+    public function getProductionPlan(string $production_plan_id): array {
         $res = array();
-        $query = 'SELECT * FROM production_plan';
-        $stmt = $this->db->query($query);
+
+        $query = 'SELECT production_plan.ID FROM production_plan WHERE ID = :production_plan_id';
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(":production_plan_id", $production_plan_id);
+        $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
             $currentPlan = $row["ID"];
 
             $stmt2 = $this->db->prepare("SELECT ski_type_id, daily_amount FROM production_skis WHERE production_plan_id LIKE :current_ON");
-            $stmt2->bindValue(":current_ON,", $currentPlan);
+            $stmt2->bindValue(":current_ON", $currentPlan);
             $stmt2->execute();
             $productionSkisRow = array();
             while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
