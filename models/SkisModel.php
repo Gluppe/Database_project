@@ -76,11 +76,10 @@ class SkisModel
 
     /**
      * Gets an individual ski, based on the order number of that specific ski
-     * @param array $payload is the production number of the ski
-     * Index 1 = production_number
+     * @param string $production_number is the production number of the ski
      * @return array single ski returned as an array
      */
-    public function getSki(array $payload): array
+    public function getSki(string $production_number): array
     {
         $res = array();
 
@@ -89,7 +88,7 @@ class SkisModel
         WHERE production_number = :production_number';
 
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue(':production_number', $payload[0]);
+        $stmt->bindValue(':production_number', $production_number);
         $stmt->execute();
 
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -144,6 +143,8 @@ class SkisModel
             $stmt->bindValue(':order_no', null);
             $stmt->bindValue(':ski_type_id', $payload['ski_type_id']);
             $stmt->execute();
+            $this->db->commit();
+            $success = true;
         } catch (Throwable $e) {
             $this->db->rollBack();
             throw $e;

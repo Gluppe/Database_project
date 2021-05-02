@@ -62,17 +62,10 @@ try {
                 http_response_code(RESTConstants::HTTP_OK);
                 print(json_encode($res));
                 break;
+            case RESTConstants::METHOD_PUT:
+            case RESTConstants::METHOD_DELETE:
             case RESTConstants::METHOD_POST:
                 http_response_code(RESTConstants::HTTP_OK);
-                print("Successfully Updated");
-                break;
-            case RESTConstants::METHOD_PUT:
-                http_response_code(RESTConstants::HTTP_OK);
-                print("Successfully Added");
-                break;
-            case RESTConstants::METHOD_DELETE:
-                http_response_code(RESTConstants::HTTP_OK);
-                print("Successfully Deleted");
                 break;
 
         }
