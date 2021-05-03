@@ -14,7 +14,7 @@ class OrdersModel {
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     }
 
-    
+
     /**
      * Method will return all orders in the database as an array.
      * @return array
@@ -175,7 +175,7 @@ class OrdersModel {
                 'UPDATE `order` SET `state` = :state WHERE order_number like :order_number and customer_id like :customer_id');
             $stmt->bindValue(":state", "canceled");
             $stmt->bindValue(":order_number", $payload["order_number"]);
-            $stmt->bindValue(":cusomer_id", $payload["customer_id"]);
+            $stmt->bindValue(":customer_id", $payload["customer_id"]);
             $stmt->execute();
             $this->db->commit();
             $success = true;
