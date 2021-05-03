@@ -267,6 +267,23 @@ class APIController
                     }
             }
             return false;
+        case RESTConstants::ENDPOINT_PLANNER:
+            switch($uri[1]) {
+                case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
+                    if(empty($payload['month']) || empty($payload['skis'])) {
+                        return false;
+                    }
+                    foreach ($payload['skis'] as $ski_type_id => $quantity) {
+                        $model = new SkisModel();
+                        if(!$model->skiTypeExist($ski_type_id)) {
+                            return false;
+                        }
+                        if(!is_int($quantity)) {
+                            return false;
+                        }
+                    }
+                    return true;
+            }
         default:
             return false;
         }
@@ -437,7 +454,7 @@ class APIController
                 return $model->getProductionPlan($uri[2]);
             case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();
-                return $model->addProductionPlanModel($payload);
+                return array($model->addProductionPlan($payload));
         }
     }
 

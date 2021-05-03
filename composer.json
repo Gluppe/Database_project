@@ -5,7 +5,6 @@
         "codeception/module-asserts": "^1.0.0"
     },
   "require": {
-    "ext-pdo": "*",
-    "ext-mysql_xdevapi": "*"
+    "ext-pdo": "*"
   }
 }
