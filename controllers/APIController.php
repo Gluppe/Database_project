@@ -437,7 +437,7 @@ class APIController
                 return $model->getProductionPlan($uri[2]);
             case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();
-                return $model->addProductionPlanModel($payload);
+                return array($model->addProductionPlan($payload));
         }
     }
 

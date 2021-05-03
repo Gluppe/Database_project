@@ -20,13 +20,31 @@ class ProductionPlanModel
     {
         $month = $payload['month'];
         if ($month < 13 && $month > 0 ) {
-            $query = 'INSERT INTO production_plan (`month`) VALUE (:month)';
+            try {
+                $this->db->beginTransaction();
+                $query = 'INSERT INTO production_plan (`month`) VALUE (:month)';
 
-            $stmt = $this->db->prepare($query);
-            $date = date("Y") . "-" . $month . "-01";
-            $date = date($date,strtotime($date));
-            $stmt->bindvalue(':month', $date);
-            $stmt->execute();
+                $stmt = $this->db->prepare($query);
+                $date = date("Y") . "-" . $month . "-01";
+                $date = date($date, strtotime($date));
+                $stmt->bindvalue(':month', $date);
+                $stmt->execute();
+
+                $lastId = $this->db->lastInsertId();
+                echo $lastId;
+                $stmt2 = $this->db->prepare(
+                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_id) VALUES (:ski_type_id, :daily_amount, :production_plan_id)");
+                foreach ($payload['skis'] as $ski_type_id => $daily_amount) {
+                    $stmt2->bindValue(":ski_type_id", $ski_type_id);
+                    $stmt2->bindValue(":daily_amount", $daily_amount);
+                    $stmt2->bindValue(":production_plan_id", $lastId);
+                    $stmt2->execute();
+                }
+                $this->db->commit();
+            } catch (throwable $e) {
+
+            }
+
             return true;
         } else {
             error_log("A month has to be between 1 and 12");
