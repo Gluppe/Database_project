@@ -14,6 +14,7 @@ class OrdersModel {
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     }
 
+
     /**
      * Method will return all orders in the database as an array.
      * @return array
@@ -39,6 +40,7 @@ class OrdersModel {
         return $res;
     }
 
+
     /**
      * Method will return an order that matches the order_number parameter.
      * @param array $query      Array query:
@@ -63,6 +65,7 @@ class OrdersModel {
         }
         return $result;
     }
+
 
     /**
      * Method will return all orders that matches the customer id parameter.
@@ -104,7 +107,6 @@ class OrdersModel {
             $stmt->bindValue(":state", $payload[2]);
             $stmt->bindValue(":reference_to_larger_order", $payload[3]);
             $stmt->bindValue(":shipment_number", $payload[4]);
-            //$stmt->bindValue(":customer_id", $payload[5]);
             $stmt->execute();
             $this->db->commit();
             $success = true;
@@ -158,12 +160,22 @@ class OrdersModel {
         return $result;
     }
 
-    public function deleteOrder(String $orderNumber): bool {
+
+    /**
+     * Canceles the order of a customer.
+     * @param array $payload
+     * @return bool
+     * @throws Exception
+     */
+    public function cancelOrder(array $payload): bool {
         $success = false;
         try {
             $this->db->beginTransaction();
-            $stmt = $this->db->prepare('DELETE FROM `order` WHERE order_number = :order_number');
-            $stmt->bindValue(":order_number", $orderNumber);
+            $stmt = $this->db->prepare(
+                'UPDATE `order` SET `state` = :state WHERE order_number like :order_number and customer_id like :customer_id');
+            $stmt->bindValue(":state", "canceled");
+            $stmt->bindValue(":order_number", $payload["order_number"]);
+            $stmt->bindValue(":customer_id", $payload["customer_id"]);
             $stmt->execute();
             $this->db->commit();
             $success = true;
@@ -192,7 +204,6 @@ class OrdersModel {
     public function addOrder(array $orderedSkis): void {
         $total_price = 0;
         try {
-
             $this->db->beginTransaction();
             foreach ($orderedSkis["skis"] as $id => $id_value){
                 $query = $this->db->prepare("select MSRP from ski_type where ID LIKE :id");
@@ -201,8 +212,6 @@ class OrdersModel {
                 $price = $query->fetch();
                 $total_price += $price[0] * $id_value;
             };
-
-            print_r("\nTotal price: " . $total_price . "\tState = new" . "\tCustomer id= " . $orderedSkis["customer_id"] . "\tDate= ".date("Y-m-d") . "\n\n");
             $stmt = $this->db->prepare(
                 'INSERT INTO `order` (total_price, state,  customer_id, date)'
                 .' VALUES(:total_price, :state, :customer_id, :date)');
@@ -212,11 +221,9 @@ class OrdersModel {
             $stmt->bindValue(":date", date("Y-m-d"));
             $stmt->execute();
             $lastOrder = $this->db->lastInsertId();
-            print_r("\nLast order:\t" . $lastOrder . "\n\n");
             $stmt2 = $this->db->prepare(
                 "INSERT INTO order_skis (ski_type_id, quantity, order_number) VALUES (:skiTypeId, :quantity, :order_number)");
             foreach ($orderedSkis["skis"] as $id => $id_value){
-                print_r("\n\nski_id: " . $id . "\tquantity: " . $id_value . "\tlast_oder: " . $lastOrder . "\n\n");
                 $stmt2->bindValue(":skiTypeId", $id);
                 $stmt2->bindValue(":quantity", $id_value);
                 $stmt2->bindValue(":order_number", $lastOrder);

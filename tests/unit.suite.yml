@@ -7,4 +7,9 @@ modules:
     enabled:
         - Asserts
         - \Helper\Unit
+        - Db:
+           dsn: 'mysql:host=localhost;dbname=ski_manufacturerdb'
+           user: 'root'
+           password: ''
+           dump: 'tests/_data/ski_manufacturerdb.sql'
     step_decorators: ~        
