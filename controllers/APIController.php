@@ -267,6 +267,15 @@ class APIController
                     }
             }
             return false;
+        case RESTConstants::ENDPOINT_PLANNER:
+            switch($uri[1]) {
+                case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
+                    if(empty($payload['month']) || empty($payload['skis'])) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+            }
         default:
             return false;
         }
