@@ -65,6 +65,23 @@ class OrdersModel {
     }
 
     /**
+     * Method will return all orders that matches the customer id parameter.
+     * @param int $customerID
+     * @return array
+     */
+    public function getOrderByCustomerId(array $customerID):array {
+        $result = array();
+        $statement = "SELECT * FROM `order` INNER JOIN order_skis o ON `order`.order_number = o.order_number WHERE `order`.customer_id LIKE :customerID";
+        $stmt = $this->db->prepare($statement);
+        $stmt->bindValue(':customerID', $customerID["customer_id"]);
+        $stmt->execute();
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    /**
      * Method will update the order that matches the orderNumber parameter with the new values provided by the other parameters.
      * @param array $payload    Array payload:
      *                          Index 0: Order number.
@@ -78,7 +95,10 @@ class OrdersModel {
         $success = false;
         try {
             $this->db->beginTransaction();
-            $stmt = $this->db->prepare('UPDATE `order` SET total_price = :total_price, `state` = :state, reference_to_larger_order = :reference_to_larger_order, shipment_number = :shipment_number WHERE order_number like :order_number');
+            $stmt = $this->db->prepare(
+                'UPDATE `order` SET total_price = :total_price, `state` = :state, 
+                   reference_to_larger_order = :reference_to_larger_order, shipment_number = :shipment_number, 
+                   customer_id = :customer_id WHERE order_number like :order_number');
             $stmt->bindValue(":order_number", $payload[0]);
             $stmt->bindValue(":total_price", $payload[1]);
             $stmt->bindValue(":state", $payload[2]);
@@ -142,54 +162,68 @@ class OrdersModel {
         $success = false;
         try {
             $this->db->beginTransaction();
-            $stmt = $this->db->prepare('DELETE FROM `order` WHERE `order`.order_number = :order_number');
+            $stmt = $this->db->prepare('DELETE FROM `order` WHERE order_number = :order_number');
             $stmt->bindValue(":order_number", $orderNumber);
             $stmt->execute();
             $this->db->commit();
             $success = true;
         }
-        catch (Throwable $e){
+        catch (Exception $e){
             $this->db->rollBack();
             throw $e;
         }
         return $success;
     }
 
+
     /**
      * Method adds an order to the database.
-     * TODO: Finish the method - parameters not defined yet
-     * @param array $orderedSkis
-     * @param int $total_price
-     * @param int $reference_to_larger_order
-     * @param int $customer_id
+     * @param array $orderedSkis should look like this:
+     *      Array
+     *       (
+     *           [customer_id] => <a_customerID>
+     *           [skis] => Array
+     *           (
+     *               [<ski_type_id>] => <quantity>
+     *           )
+     *       )
+     * @throws Exception
      */
-    public function addOrder(array $orderedSkis, int $total_price, int $reference_to_larger_order, int $customer_id): void {
-        $totalPrice = 0;
-        foreach ($orderedSkis as $value){
-            $totalPrice += $value[2];
-        }
+    public function addOrder(array $orderedSkis): void {
+        $total_price = 0;
         try {
+
             $this->db->beginTransaction();
+            foreach ($orderedSkis["skis"] as $id => $id_value){
+                $query = $this->db->prepare("select MSRP from ski_type where ID LIKE :id");
+                $query->bindValue(":id", $id);
+                $query->execute();
+                $price = $query->fetch();
+                $total_price += $price[0] * $id_value;
+            };
+
+            print_r("\nTotal price: " . $total_price . "\tState = new" . "\tCustomer id= " . $orderedSkis["customer_id"] . "\tDate= ".date("Y-m-d") . "\n\n");
             $stmt = $this->db->prepare(
-                'INSERT INTO `order` (total_price, state, reference_to_larger_order, customer_id)'
-                .' VALUES(:total_price, :state, :reference_to_larger_order, :customer_id)');
+                'INSERT INTO `order` (total_price, state,  customer_id, date)'
+                .' VALUES(:total_price, :state, :customer_id, :date)');
             $stmt->bindValue(':total_price', $total_price);
             $stmt->bindValue(':state', "new");
-            $stmt->bindValue(':reference_to_larger_order', $reference_to_larger_order);
-            $stmt->bindValue(':customer_id', $customer_id);
+            $stmt->bindValue(':customer_id', $orderedSkis["customer_id"]);
+            $stmt->bindValue(":date", date("Y-m-d"));
             $stmt->execute();
             $lastOrder = $this->db->lastInsertId();
-
+            print_r("\nLast order:\t" . $lastOrder . "\n\n");
             $stmt2 = $this->db->prepare(
                 "INSERT INTO order_skis (ski_type_id, quantity, order_number) VALUES (:skiTypeId, :quantity, :order_number)");
-            foreach ($orderedSkis as $value){
-                $stmt2->bindValue(":skitypeId", $value[0]);
-                $stmt2->bindValue(":quantity", $value[1]);
+            foreach ($orderedSkis["skis"] as $id => $id_value){
+                print_r("\n\nski_id: " . $id . "\tquantity: " . $id_value . "\tlast_oder: " . $lastOrder . "\n\n");
+                $stmt2->bindValue(":skiTypeId", $id);
+                $stmt2->bindValue(":quantity", $id_value);
                 $stmt2->bindValue(":order_number", $lastOrder);
                 $stmt2->execute();
             }
             $this->db->commit();
-        } catch (Throwable $e){
+        } catch (Exception $e){
             $this->db->rollBack();
             throw $e;
         }
