@@ -272,9 +272,17 @@ class APIController
                 case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
                     if(empty($payload['month']) || empty($payload['skis'])) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    foreach ($payload['skis'] as $ski_type_id => $quantity) {
+                        $model = new SkisModel();
+                        if(!$model->skiTypeExist($ski_type_id)) {
+                            return false;
+                        }
+                        if(!is_int($quantity)) {
+                            return false;
+                        }
+                    }
+                    return true;
             }
         default:
             return false;
