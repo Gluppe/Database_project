@@ -18,6 +18,7 @@ class ProductionPlanModel
      */
     public function addProductionPlan(array $payload): bool
     {
+        $success = false;
         $month = $payload['month'];
         if ($month < 13 && $month > 0 ) {
             try {
@@ -33,19 +34,19 @@ class ProductionPlanModel
                 $lastId = $this->db->lastInsertId();
                 echo $lastId;
                 $stmt2 = $this->db->prepare(
-                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_id) VALUES (:ski_type_id, :daily_amount, :production_plan_id)");
+                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_month) VALUES (:ski_type_id, :daily_amount, :production_plan_month)");
                 foreach ($payload['skis'] as $ski_type_id => $daily_amount) {
                     $stmt2->bindValue(":ski_type_id", $ski_type_id);
                     $stmt2->bindValue(":daily_amount", $daily_amount);
-                    $stmt2->bindValue(":production_plan_id", $lastId);
+                    $stmt2->bindValue(":production_plan_month", $date);
                     $stmt2->execute();
                 }
                 $this->db->commit();
-            } catch (throwable $e) {
-
+                $success = true;
+            } catch (Exception $e) {
+                $this->db->rollBack();
             }
-
-            return true;
+            return $success;
         } else {
             error_log("A month has to be between 1 and 12");
             return false;
