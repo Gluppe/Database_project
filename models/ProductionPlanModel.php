@@ -16,15 +16,21 @@ class ProductionPlanModel
      * @param array $payload
      * Index 0 = month
      */
-    public function addProductionPLan(array $payload)
+    public function addProductionPlan(array $payload): bool
     {
-        if ($payload < 13 && $payload > 0 ) {
-            $query = 'INSERT INTO production_plan (`month`) VALUE (`:month`)';
+        $month = $payload['month'];
+        if ($month < 13 && $month > 0 ) {
+            $query = 'INSERT INTO production_plan (`month`) VALUE (:month)';
 
             $stmt = $this->db->prepare($query);
-            $stmt->bindvalue(':month', $payload);
+            $date = date("Y") . "-" . $month . "-01";
+            $date = date($date,strtotime($date));
+            $stmt->bindvalue(':month', $date);
+            $stmt->execute();
+            return true;
         } else {
             error_log("A month has to be between 1 and 12");
+            return false;
         }
     }
 
