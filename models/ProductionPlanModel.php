@@ -54,29 +54,27 @@ class ProductionPlanModel
     }
 
     /** gets the production plan and all skis that are to be produced.
-     * @param string $production_plan_id the production plan id
+     * @param string $month the month
      * @return array consists of the production plan id and an array of the daily amount of skis to be produced
      */
-    public function getProductionPlan(string $production_plan_id): array {
+    public function getProductionPlan(string $month): array {
         $res = array();
-
-        $query = 'SELECT production_plan.ID FROM production_plan WHERE ID = :production_plan_id';
-        $stmt = $this->db->prepare($query);
-        $stmt->bindValue(":production_plan_id", $production_plan_id);
-        $stmt->execute();
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-            $currentPlan = $row["ID"];
-
-            $stmt2 = $this->db->prepare("SELECT ski_type_id, daily_amount FROM production_skis WHERE production_plan_id LIKE :current_ON");
-            $stmt2->bindValue(":current_ON", $currentPlan);
-            $stmt2->execute();
-            $productionSkisRow = array();
-            while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
-                $productionSkisRow[$row2["ski_type_id"]] = $row2["daily_amount"];
-            }
-            $row["daily_amount"] = $productionSkisRow;
-            $res[] = $row;
+        if($month > 0 && $month <= 9) {
+            $month = "0" . $month;
         }
+        $date = date("Y") . "-" . $month . "-01";
+        $date = date($date, strtotime($date));
+
+        $stmt = $this->db->prepare("SELECT ski_type_id, daily_amount FROM production_skis WHERE production_skis.production_plan_month LIKE :month");
+        $stmt->bindValue(":month", $date);
+        $stmt->execute();
+        $productionSkisRow = array();
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $productionSkisRow[$row["ski_type_id"]] = $row["daily_amount"];
+        }
+        $res = array();
+        $res['month'] = $month;
+        $res['skis'] = $productionSkisRow;
         return $res;
     }
     
