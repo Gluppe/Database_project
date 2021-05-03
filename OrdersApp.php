@@ -4,12 +4,11 @@ require_once 'models/OrdersModel.php';
 $model = new OrdersModel();
 
 $customer_id = 10;
-$skis = array("1" => "100","2" => "30");
-$payload = array("customer_id"=> $customer_id, "skis" => $skis);
-$int = NULL;
-try {
+$order_number = 1;
+$payload = array("customer_id"=> $customer_id);
 
-    $model->addOrder($payload);
+try {
+    print_r($model->getOrderByCustomerId($payload));
 } catch (Throwable $e) {
     print_r($e);
 }
