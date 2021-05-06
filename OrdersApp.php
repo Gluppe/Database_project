@@ -3,12 +3,15 @@ require_once 'models/OrdersModel.php';
 
 $model = new OrdersModel();
 
-$customer_id = 10;
-$order_number = 1;
-$payload = array("customer_id"=> $customer_id);
+$customer_id = "";
+$order_number = "";
+$state = "";
+$date = "";
+$payload = array("customer_id"=> $customer_id, "since"=>$date, "state"=>$state);
+$uri = array("", "", $order_number);
 
 try {
-    print_r($model->getOrderByCustomerId($payload));
+    print_r($model->getOrder($uri,$payload));
 } catch (Throwable $e) {
     print_r($e);
 }

@@ -15,14 +15,70 @@ class OrdersModel {
     }
 
 
+    public function getOrdersFiltered(array $query) : array{
+        $result[] = array();
+
+        $statement = 'SELECT * FROM `order` 
+    INNER JOIN order_skis o ON `order`.order_number = o.order_number 
+WHERE o.order_number LIKE :order_number ';
+
+        //Searches DB with filter for both date and state
+        if ($query[1] != null && $query[2] != null){ $query = $query . '';}
+        //Only date filter is applied
+        elseif ($query[1]!=null){$statement = $statement . 'AND date AFTER :date';}
+        //only state is applied
+        else {$statement = $statement . 'AND state LIKE :state';}
+
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare($statement);
+            $stmt->bindValue(":order_number", "%" . $query[0] . "%");
+            if ($query[1] != null){
+                $stmt->bindValue(":date", $query[1]);
+            }
+            if ($query[2] != null){
+                $stmt->bindValue(":state", $query[2]);
+            }
+            $stmt->execute();
+            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $result[] = $row;
+            }
+            $this->db->commit();
+        } catch (Throwable $e){
+            $this->db->rollBack();
+            throw $e;
+        }
+        return $result;
+    }
+
+
+
+
+
     /**
-     * Method will return all orders in the database as an array.
-     * @return array
+     * Method will return an order that matches the order_number parameter.
+     * @param array $query      Array query:
+     *                          Index 0: Customer number.
+     *                          Index 1: Order Number.
+     * @return array            Array with all orders and all values of the order
      */
-    public function getOrders(): array {
-        $res = array();
-        $query = 'SELECT * FROM `order`';
-        $stmt = $this->db->query($query);
+    public function getOrder(array $uri, array $query): array {
+        $result = array();
+        $statement = "
+            SELECT * FROM `order` 
+            WHERE (order_number LIKE :orderNumber) 
+              AND (customer_id LIKE :customerNumber)
+              AND (`order`.date > :dato) 
+              AND (`order`.state LIKE :status)
+              ";
+
+        $stmt = $this->db->prepare($statement);
+        $stmt->bindValue(':orderNumber',  $uri[2] . "%");
+        $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
+        $stmt->bindValue(":dato", "%" . $query["since"] . "%");
+        $stmt->bindValue(":status", "%" . $query["state"] . "%");
+        $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $currentOrderNumber = $row["order_number"];
 
@@ -35,54 +91,17 @@ class OrdersModel {
             }
             //array_push($row, $orderSkisRow);
             $row["skiType_quantity"] = $orderSkisRow;
-            $res[] = $row;
-        }
-        return $res;
-    }
-
-
-    /**
-     * Method will return an order that matches the order_number parameter.
-     * @param array $query      Array query:
-     *                          Index 0: Customer number.
-     *                          Index 1: Order Number.
-     * @return array            Array with all orders and all values of the order
-     */
-    public function getOrder(array $query): array {
-        $result = array();
-        $statement = "SELECT * FROM `order` INNER JOIN order_skis o ON `order`.order_number = o.order_number WHERE o.order_number LIKE :order_number";
-        if ($query[0] != null){
-            $statement = $statement . " AND customer_number LIKE :customerNumber";
-        }
-        $stmt = $this->db->prepare($statement);
-        $stmt->bindValue(':order_number', $query[1]);
-        if ($query[0] != null){
-            $stmt->bindValue(":customerNumber", $query[0]);
-        }
-            $stmt->execute();
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $result[] = $row;
         }
         return $result;
     }
 
-
-    /**
-     * Method will return all orders that matches the customer id parameter.
-     * @param int $customerID
-     * @return array
+    /*
+     * Får inn orderenummer
+     * skal finne antall produserte og available ski :
+     *      Gi dem ett orderenummer og sette dem til unavailable.
+     *      Opprette nytt orderenummer på
      */
-    public function getOrderByCustomerId(array $customerID):array {
-        $result = array();
-        $statement = "SELECT * FROM `order` INNER JOIN order_skis o ON `order`.order_number = o.order_number WHERE `order`.customer_id LIKE :customerID";
-        $stmt = $this->db->prepare($statement);
-        $stmt->bindValue(':customerID', $customerID["customer_id"]);
-        $stmt->execute();
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = $row;
-        }
-        return $result;
-    }
 
     /**
      * Method will update the order that matches the orderNumber parameter with the new values provided by the other parameters.
@@ -115,49 +134,6 @@ class OrdersModel {
             throw $e;
         }
         return $success;
-    }
-
-    /**
-     * @param array $query      Query array:
-     *                          Index 0: Order number.
-     *                          Index 1: Date.
-     *                          Index 2: State.
-     * @return array            Array of orders that fit the filter.
-     * @throws Throwable        Error message if query fails.
-     */
-    public function getOrdersFiltered(array $query) : array{
-        $result[] = array();
-
-        $statement = 'SELECT * FROM `order` INNER JOIN order_skis o ON `order`.order_number = o.order_number WHERE o.order_number LIKE :order_number ';
-
-        //Searches DB with filter for both date and state
-        if ($query[1] != null && $query[2] != null){ $query = $query . 'AND date AFTER :date AND state LIKE :state';}
-        //Only date filter is applied
-        elseif ($query[1]!=null){$statement = $statement . 'AND date AFTER :date';}
-        //only state is applied
-        else {$statement = $statement . 'AND state LIKE :state';}
-
-        try {
-            $this->db->beginTransaction();
-
-            $stmt = $this->db->prepare($statement);
-            $stmt->bindValue(":order_number", "%" . $query[0] . "%");
-            if ($query[1] != null){
-                $stmt->bindValue(":date", $query[1]);
-            }
-            if ($query[2] != null){
-                $stmt->bindValue(":state", $query[2]);
-            }
-            $stmt->execute();
-            while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $result[] = $row;
-            }
-            $this->db->commit();
-        } catch (Throwable $e){
-            $this->db->rollBack();
-            throw $e;
-        }
-        return $result;
     }
 
 
