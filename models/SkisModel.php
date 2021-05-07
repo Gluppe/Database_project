@@ -153,7 +153,7 @@ class SkisModel
     /** Checks if a ski type exists
      * @param int $ski_type_id the id of the ski type
      */
-    public function skiTypeExist(int $ski_type_id): bool
+    public function skiTypeExist(string $ski_type_id): bool
     {
 
         $query = 'SELECT COUNT(1) FROM ski_type WHERE ID = :ski_type_id;';

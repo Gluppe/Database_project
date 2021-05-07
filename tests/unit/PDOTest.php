@@ -25,10 +25,8 @@ class PDOTest extends Unit {
 
     public function testAddSKiNewSKiType() {
         $SkisModel = new skisModel();
-        $SkisModel->addSki(array('ski_type_id' => 1));
+        $SkisModel->addSki(array('ski_type_id' => 2));
 
-        $this->tester->seeInDatabase('ski', array('ski_type_id' => 1));
+        $this->tester->seeInDatabase('ski', array('ski_type_id' => 2));
     }
-
-
 }
