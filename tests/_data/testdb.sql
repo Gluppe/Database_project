@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 29, 2021 at 10:31 AM
+-- Generation Time: May 07, 2021 at 11:57 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `ski_manufacturerdb`
+-- Database: `testdb`
 --
 
 -- --------------------------------------------------------
@@ -192,7 +192,10 @@ CREATE TABLE `ski` (
 --
 
 INSERT INTO `ski` (`production_number`, `available`, `order_no`, `ski_type_id`) VALUES
-(1, 1, 1, 2);
+(2, 1, NULL, 1),
+(3, 1, NULL, 1),
+(4, 1, NULL, 1),
+(5, 1, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -407,7 +410,7 @@ ALTER TABLE `shipments`
 -- AUTO_INCREMENT for table `ski`
 --
 ALTER TABLE `ski`
-  MODIFY `production_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `production_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `ski_type`

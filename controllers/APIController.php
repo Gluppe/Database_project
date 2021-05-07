@@ -245,7 +245,7 @@ class APIController
         case RESTConstants::ENDPOINT_CUSTOMER:
             switch($uri[1]) {
                 case RESTConstants::ENDPOINT_ORDERS:
-                    foreach ($payload as $ski_type_id => $quantity) {
+                    foreach ($payload['skis'] as $ski_type_id => $quantity) {
                         $model = new SkisModel();
                         if(!$model->skiTypeExist($ski_type_id)) {
                             return false;
@@ -333,10 +333,11 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrders();
+                return $model->getOrder(array(), $queries);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
-                $model->addOrder($payload);
+                $model->addOrder($payload, $queries);
+                return array(true);
         }
         return array();
     }
@@ -353,7 +354,7 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrder($queries);
+                return $model->getOrder($uri, $queries);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 $success = $model->updateOrder($payload);
@@ -366,7 +367,7 @@ class APIController
                 }
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
-                $success = $model->deleteOrder($uri[2]);
+                $success = $model->cancelOrder($uri[2]);
                 if($success) {
                     print("the order was successfully deleted\n");
                     return array(true);
