@@ -69,14 +69,14 @@ WHERE o.order_number LIKE :order_number ';
             SELECT * FROM `order` 
             WHERE (order_number LIKE :orderNumber) 
               AND (customer_id LIKE :customerNumber)
-              AND (`order`.date > :dato) 
+              AND (`order`.date > :dato ) 
               AND (`order`.state LIKE :status)
               ";
 
         $stmt = $this->db->prepare($statement);
         $stmt->bindValue(':orderNumber',  $uri[2] . "%");
         $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
-        $stmt->bindValue(":dato", "%" . $query["since"] . "%");
+        $stmt->bindValue(":dato", date("Y-m-d", strtotime($query["since"])));
         $stmt->bindValue(":status", "%" . $query["state"] . "%");
         $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -89,7 +89,6 @@ WHERE o.order_number LIKE :order_number ';
             while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
                 $orderSkisRow[$row2["ski_type_id"]] = $row2["quantity"];
             }
-            //array_push($row, $orderSkisRow);
             $row["skiType_quantity"] = $orderSkisRow;
             $result[] = $row;
         }
