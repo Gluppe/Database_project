@@ -36,15 +36,11 @@ class PDOTest extends Unit {
         $this->tester->seeInDatabase('ski', array('ski_type_id' => 3));
     }
 
-    /*
-    public function testGetOrderByOrderNumber() {
-        $OrdersModel = new OrdersModel();
-        $OrdersModel->getOrder(array('order_number' => 1));
-
-        $this->tester->assertEquals(array('order_number' => 1));
-    }
-    */
-
+    /**
+     * Finding a single ski by their production number. Since getSki returns
+     * an array, you check the first entry, if the production number matches
+     * your input
+     */
     public function testGetSkiByProductionNumber() {
         $SkisModel = new skisModel();
 
@@ -59,20 +55,28 @@ class PDOTest extends Unit {
         $this->tester->assertEquals('1', $test1['production_number']);
     }
 
-    public function testCancelOrderByOrderNumber() {
-        $OrdersModel = new OrdersModel();
-        $OrdersModel->cancelOrder(array('order_number' => 428, 'customer_id' => 10));
-        $res = $OrdersModel->getOrder(array('order_number' => 428, 'customer_id' => 10));
+    public function testGetAllSkis() {
+        $SkisModel = new skisModel();
+        $res = $SkisModel->getSkis();
 
-        $this->tester->assertEquals('canceled', $res['state']);
+        $this->tester->assertIsArray($res);
+
+        if ($res[0]['production_number'] = '1') {
+            $test1 = $res[0];
+        }
+
+        $this->tester->assertEquals('1', $test1['production_number']);
     }
 
-
+    /**
+     * You get the array of skis, then you test the first ski in the array. If the array key
+     * 'grip_system' matches your input the test passes
+     */
     public function testGetSkiTypesByGripSystem() {
         $skisModel = new skisModel();
         $res = $skisModel->getSkiTypesByGripSystem(array('wax'));
 
-        //$this->tester->assertIsArray($res);
+        $this->tester->assertIsArray($res);
 
         if ($res[0]['grip_system'] = 'wax') {
             $test1 = $res[0];
