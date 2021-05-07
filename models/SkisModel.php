@@ -98,27 +98,25 @@ class SkisModel
     }
 
     /**
-     * A function that changes the values og available and order_no for a ski
+     * A function that changes the values of available and order_no for a ski
      * using an update SQL statement
-     * @param array $payload The array we receive with available and order_no parameters
-     * index 0 = available
-     * index 1 = order_no
+     * @param array $queries the user requested queries including the order number
      * @return bool Returns if the update function was sucsessful enough
      */
-    public function updateSki(array $payload): bool
+    public function addSkiToOrder(array $queries): bool
     {
 
         $success = false;
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare('UPDATE ski SET  available = :available, order_no = :order_no WHERE production_number LIKE production_number');
-            $stmt->bindValue(":available", $payload['available']);
-            $stmt->bindValue(":order_no", $payload['order_number']);
+            $stmt->bindValue(":available", 0);
+            $stmt->bindValue(":order_no", $queries['order_number']);
             $stmt->execute();
             $success = true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
-            throw $e;
+            print($e);
         }
         return $success;
     }
@@ -145,9 +143,9 @@ class SkisModel
             $stmt->execute();
             $this->db->commit();
             $success = true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
-            throw $e;
+            print($e);
         }
         return $success;
     }
