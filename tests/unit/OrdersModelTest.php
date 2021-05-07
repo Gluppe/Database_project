@@ -40,7 +40,11 @@ class OrdersModelTest extends Unit {
         $OrdersModel->cancelOrder(array('order_number' => 428, 'customer_id' => 10));
         $res = $OrdersModel->getOrder(array('order_number' => 428, 'customer_id' => 10));
 
-        $this->tester->assertEquals('canceled', $res['state']);
+        if($res[0]['state'] = 'cancled') {
+            $test1 = $res[0];
+        }
+
+        $this->tester->assertEquals('canceled', $test1['state']);
     }
 
 

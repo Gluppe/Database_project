@@ -1,3 +1,4 @@
 tests\unit\OrdersModelTest.php:testGetOrderByOrderNumber
 tests\unit\OrdersModelTest.php:testCancelOrderByOrderNumber
+tests\unit\PDOTest.php:testAddSKiNewSKiByType
 
