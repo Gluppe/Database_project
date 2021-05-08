@@ -476,6 +476,9 @@ class APIController
                 $model = new SkisModel();
                 $query = explode( ',', $queries['grip']);
                 return $model->getSkiTypesByGripSystem($query);
+            } else {
+                $model = new SkisModel();
+                return $model->getSkiTypes();
             }
         }
     }
