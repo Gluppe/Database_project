@@ -4,6 +4,8 @@ require_once 'models/OrdersModel.php';
 require_once 'models/SkisModel.php';
 require_once 'models/ShipmentsModel.php';
 require_once 'models/ProductionPlanModel.php';
+require_once 'models/AuthorisationModel.php';
+require_once 'controllers/APIException.php';
 
 class APIController
 {
@@ -480,6 +482,25 @@ class APIController
                 $model = new SkisModel();
                 return $model->getSkiTypes();
             }
+        } else {
+            return array(false);
+        }
+    }
+
+    /**
+     * Verifies that the request contains a valid authorisation token. The authorisation scheme is quite simple -
+     * assuming that there is only one authorisation token for the complete API
+     * @param string $token the authorisation token to be verified
+     * @param string $endpoint the endpoint which has been accessed
+     * @throws APIException with the code set to HTTP_FORBIDDEN if the token is not valid
+     */
+    public function authorise(string $token, string $endpoint)
+    {
+        if (!(new AuthorisationModel())->isValid($token, $endpoint)) {
+            throw new APIException(RESTConstants::HTTP_FORBIDDEN, $endpoint);
         }
     }
 }
+
+
+
