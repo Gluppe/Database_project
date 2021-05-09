@@ -11,10 +11,23 @@ class SkisModel
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     }
 
-    /** A method to get a list of skis by model
+    /** A method to get a list of all the ski types
+     * @return array An array of all the ski types in the database
+     */
+    public function getSkiTypes(): array {
+        $res = array();
+        $query = 'SELECT * FROM ski_type';
+
+        $stmt = $this->db->query($query);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+    }
+    /** A method to get a list of ski types by model
      * @param array $queries
      * Index 0 = model
-     * @return array An array of skis of this model
+     * @return array An array of ski types of this model
      */
     public function getSkiTypesByModel(array $queries): array
     {
@@ -33,10 +46,10 @@ class SkisModel
         return $res;
     }
 
-    /** A method to get a list of skis by grip system
+    /** A method to get a list of ski types by grip system
      * @param array $queries grip system in ski_type
      * Index 0 = grip_system
-     * @return array Array of skis with this grip system
+     * @return array Array of ski types with this grip system
      */
     public function getSkiTypesByGripSystem(array $queries): array
     {
