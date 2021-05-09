@@ -26,7 +26,6 @@ if (strlen($content) > 0) {
 }
 
 $token = isset($_COOKIE['auth_token']) ? $_COOKIE['auth_token'] : '';
-
 $controller = new APIController();
 
 // Check that the request is valid
@@ -51,7 +50,7 @@ if (!$controller->isValidPayload($uri, $requestMethod, $payload)) {
 
 try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
-
+    $controller->authorise($token, $uri[0]);
     if (count($res) == 0) {
         print("No information available");
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
