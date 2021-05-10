@@ -47,6 +47,17 @@ class OrdersModelTest extends Unit {
         $this->tester->assertEquals('canceled', $test1['state']);
     }
 
+    public function updateOrderShipmentNumber() {
+        $OrdersModel = new OrdersModel();
+        $res = $OrdersModel->updateOrder(array(12));
+
+        if($res[0]['shipment_number'] = 12) {
+            $test1 = res[0];
+        }
+
+        $this->testerassertEquals(12, $test1);
+    }
+
 
 
 }
