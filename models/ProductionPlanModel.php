@@ -34,7 +34,7 @@ class ProductionPlanModel
                 $lastId = $this->db->lastInsertId();
                 echo $lastId;
                 $stmt2 = $this->db->prepare(
-                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_month) VALUES (:ski_type_id, :daily_amount, :production_plan_month)");
+                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_id) VALUES (:ski_type_id, :daily_amount, :production_plan_month)");
                 foreach ($payload['skis'] as $ski_type_id => $daily_amount) {
                     $stmt2->bindValue(":ski_type_id", $ski_type_id);
                     $stmt2->bindValue(":daily_amount", $daily_amount);
