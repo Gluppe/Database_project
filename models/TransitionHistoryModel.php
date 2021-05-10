@@ -17,8 +17,7 @@ class TransitionHistoryModel{
     public function addTransitionHistory(int $orderNumber, String $state) {
         try {
             $this->db->beginTransaction();
-            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)
-                    WHERE order_number = :order_number';
+            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)';
 
             $previousState = $this->getCurrentOrderState($orderNumber);
 
