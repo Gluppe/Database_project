@@ -61,11 +61,8 @@ class PDOTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['production_number'] = '1') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('1', $test1['production_number']);
+        $expectedCount = 4;
+        $this->assertCount($expectedCount, $res);
     }
 
     /**

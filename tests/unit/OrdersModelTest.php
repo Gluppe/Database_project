@@ -49,7 +49,8 @@ class OrdersModelTest extends Unit {
 
     public function updateOrderShipmentNumber() {
         $OrdersModel = new OrdersModel();
-        $res = $OrdersModel->updateOrder(array(12));
+        $OrdersModel->updateOrder(array(12));
+        $res = $OrdersModel->getOrder();
 
         if($res[0]['shipment_number'] = 12) {
             $test1 = res[0];
