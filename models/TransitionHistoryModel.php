@@ -17,8 +17,7 @@ class TransitionHistoryModel{
     public function addTransitionHistory(int $orderNumber, String $state) {
         try {
             $this->db->beginTransaction();
-            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)
-                    WHERE order_number = :order_number';
+            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)';
 
             $previousState = $this->getCurrentOrderState($orderNumber);
 
@@ -26,9 +25,9 @@ class TransitionHistoryModel{
             $stmt->bindValue("state_change", $previousState . " -> " . $state);
             $stmt->bindValue("order_number", $orderNumber);
             $stmt->execute();
-        } catch (Throwable $e){
+        } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
     }
 

@@ -75,11 +75,15 @@ class APIController
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
                 return $model->getOrder($uri, $queries);
-            case RESTConstants::METHOD_POST:
+            case RESTConstants::METHOD_PATCH:
                 $model = new OrdersModel();
-                $success = $model->updateOrder($payload);
+                $success = $model->updateOrder($uri, $payload);
                 if($success) {
                     print("the order was successfully updated\n");
+                    if($uri[0] == "shipper" || $uri[0] == "storekeeper") {
+                        $model = new TransitionHistoryModel();
+                        $model->addTransitionHistory($uri[2], $payload['state']);
+                    }
                     return array(true);
                 } else {
                     print("Something went wrong, the order was not updated\n");
@@ -206,8 +210,7 @@ class APIController
     }
 
     /**
-     * Verifies that the request contains a valid authorisation token. The authorisation scheme is quite simple -
-     * assuming that there is only one authorisation token for the complete API
+     * Verifies that the request contains a valid authorisation token.
      * @param string $token the authorisation token to be verified
      * @param string $endpoint the endpoint which has been accessed
      * @throws APIException with the code set to HTTP_FORBIDDEN if the token is not valid

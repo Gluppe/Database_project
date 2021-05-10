@@ -10,6 +10,7 @@ class RESTConstants
     const METHOD_POST = 'POST';
     const METHOD_PUT = 'PUT';
     const METHOD_DELETE = 'DELETE';
+    const METHOD_PATCH = 'PATCH';
 
     // HTTP status codes
     const HTTP_OK = 200;

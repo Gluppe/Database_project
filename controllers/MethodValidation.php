@@ -113,11 +113,14 @@ class MethodValidation {
      */
     public function validShipperMethod(array $uri, string $requestMethod): bool {
         return match ($uri[1]) {
-            RESTConstants::ENDPOINT_ORDERS, RESTConstants::ENDPOINT_SHIPMENT => match ($requestMethod) {
-                RESTConstants::METHOD_POST, RESTConstants::METHOD_GET => true,
+            RESTConstants::ENDPOINT_ORDERS => match ($requestMethod) {
+                RESTConstants::METHOD_PATCH, RESTConstants::METHOD_GET => true,
                 default => false,
             },
-            default => false,
+            RESTConstants::ENDPOINT_SHIPMENT => match($requestMethod) {
+                RESTConstants::METHOD_GET => true,
+                default => false,
+            },
         };
     }
 
@@ -130,10 +133,21 @@ class MethodValidation {
 
         switch($uri[1]) {
             case RESTConstants::ENDPOINT_SKIS:
-            case RESTConstants::ENDPOINT_ORDERS:
                 if(empty($uri[2])) {
                     return match ($requestMethod) {
                         RESTConstants::METHOD_GET, RESTConstants::METHOD_POST => true,
+                        default => false,
+                    };
+                } else {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_GET => true,
+                        default => false,
+                    };
+                }
+            case RESTConstants::ENDPOINT_ORDERS:
+                if(empty($uri[2])) {
+                    return match ($requestMethod) {
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_PATCH => true,
                         default => false,
                     };
                 } else {
