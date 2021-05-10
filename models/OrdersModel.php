@@ -45,9 +45,9 @@ WHERE o.order_number LIKE :order_number ';
                 $result[] = $row;
             }
             $this->db->commit();
-        } catch (Throwable $e){
+        } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
         return $result;
     }
@@ -128,16 +128,16 @@ WHERE o.order_number LIKE :order_number ';
             $stmt->execute();
             $this->db->commit();
             $success = true;
-        }catch (Throwable $e){
+        }catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
         return $success;
     }
 
 
     /**
-     * Canceles the order of a customer.
+     * Cancels the order of a customer.
      * @param array $payload
      * @return bool
      * @throws Exception
