@@ -1,6 +1,9 @@
 <?php
 require_once 'RESTConstants.php';
 require_once 'controllers/APIController.php';
+require_once 'controllers/EndpointValidation.php';
+require_once 'controllers/MethodValidation.php';
+require_once 'controllers/PayloadValidation.php';
 
 
 // Parse request parameters
@@ -8,7 +11,6 @@ $queries = array();
 if (!empty($_SERVER['QUERY_STRING'])) {
     parse_str($_SERVER['QUERY_STRING'], $queries);
 }
-
 
 
 $uri = $_SERVER['PHP_SELF'];
@@ -27,30 +29,39 @@ if (strlen($content) > 0) {
 
 $token = isset($_COOKIE['auth_token']) ? $_COOKIE['auth_token'] : '';
 $controller = new APIController();
+$endpointValidation = new EndpointValidation();
 
 // Check that the request is valid
-if (!$controller->isValidEndpoint($uri)) {
+if (!$endpointValidation->isValidEndpoint($uri)) {
     // Endpoint not recognised
     error_log("Not valid endpoint");
     http_response_code(RESTConstants::HTTP_NOT_FOUND);
     return;
 }
-if (!$controller->isValidMethod($uri, $requestMethod)) {
+$methodValidation = new MethodValidation();
+if (!$methodValidation->isValidMethod($uri, $requestMethod)) {
     // Method not supported
     error_log("Not valid method");
     http_response_code(RESTConstants::HTTP_METHOD_NOT_ALLOWED);
     return;
 }
-if (!$controller->isValidPayload($uri, $requestMethod, $payload)) {
+$payloadValidation = new PayloadValidation();
+if (!$payloadValidation->isValidPayload($uri, $requestMethod, $payload)) {
     // Payload is incorrectly formatted
     error_log("Not valid payload");
     http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     return;
 }
-
+try{
+    $controller->authorise($token, $uri[0]);
+} catch (Exception $e) {
+    print("A Token is needed");
+    http_response_code(RESTConstants::HTTP_BAD_REQUEST);
+    return;
+}
 try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
-    $controller->authorise($token, $uri[0]);
+
     if (count($res) == 0) {
         print("No information available");
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
