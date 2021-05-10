@@ -25,9 +25,9 @@ class TransitionHistoryModel{
             $stmt->bindValue("state_change", $previousState . " -> " . $state);
             $stmt->bindValue("order_number", $orderNumber);
             $stmt->execute();
-        } catch (Throwable $e){
+        } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
     }
 

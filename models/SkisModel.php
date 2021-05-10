@@ -114,7 +114,7 @@ class SkisModel
      * A function that changes the values of available and order_no for a ski
      * using an update SQL statement
      * @param array $queries the user requested queries including the order number
-     * @return bool Returns if the update function was sucsessful enough
+     * @return bool Returns if the update function was successful enough
      */
     public function addSkiToOrder(array $queries): bool
     {
@@ -164,7 +164,8 @@ class SkisModel
     }
 
     /** Checks if a ski type exists
-     * @param int $ski_type_id the id of the ski type
+     * @param string $ski_type_id the id of the ski type
+     * @return bool true if ski type exist, false otherwise
      */
     public function skiTypeExist(string $ski_type_id): bool
     {

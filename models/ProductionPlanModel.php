@@ -77,6 +77,4 @@ class ProductionPlanModel
         $res['skis'] = $productionSkisRow;
         return $res;
     }
-    
-
 }
