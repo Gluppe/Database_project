@@ -1,7 +1,7 @@
 <?php
 use Codeception\Test\Unit;
 require_once 'dbCredentials.php';
-require_once 'models/productionPlan.php';
+require_once 'models/ProductionPlanModel.php';
 
 class ProductionPlanModelTest extends Unit
 {

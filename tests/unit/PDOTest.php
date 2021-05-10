@@ -28,13 +28,16 @@ class PDOTest extends Unit {
      * A unit test for adding a new ski, make sure there are no skis of
      * ski_type_id 3 so the seeInDatabase wont find an already existing ski
      * @todo Make sure the database cleans up after each test
-     */
+    */
     public function testAddSKiNewSKiByType() {
         $SkisModel = new skisModel();
-        $SkisModel->addSki(array('ski_type_id' => 3));
+        $SkisModel->addSki(array('ski_type_id' => 1));
 
-        $this->tester->seeInDatabase('ski', array('ski_type_id' => 3));
+        $Last_id = mysqli_insert_id();
+
+        $this->tester->assertEquals('1',  $SkisModel->getSki($Last_id));
     }
+
 
     /**
      * Finding a single ski by their production number. Since getSki returns
@@ -57,12 +60,9 @@ class PDOTest extends Unit {
 
     public function testGetAllSkis() {
         $SkisModel = new skisModel();
-        $res = $SkisModel->getSkis();
 
-        $this->tester->assertIsArray($res);
-
-        $expectedCount = 4;
-        $this->assertCount($expectedCount, $res);
+        $expectedCount = 2;
+        $this->assertCount($expectedCount, $SkisModel->getSkis());
     }
 
     /**
@@ -81,4 +81,6 @@ class PDOTest extends Unit {
 
         $this->tester->assertEquals('wax', $test1['grip_system']);
     }
+
+
 }
