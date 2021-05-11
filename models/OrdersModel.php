@@ -65,15 +65,24 @@ WHERE o.order_number LIKE :order_number ';
             SELECT * FROM `order` 
             WHERE (order_number LIKE :orderNumber) 
               AND (customer_id LIKE :customerNumber)
-              AND (`order`.date > :dato ) 
+              AND (`order`.date > :date ) 
               AND (`order`.state LIKE :status)
               ";
 
         $stmt = $this->db->prepare($statement);
         $stmt->bindValue(':orderNumber',  $uri[2]);
         $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
-        $stmt->bindValue(":dato", date("Y-m-d", strtotime($query["since"])));
-        $stmt->bindValue(":status", "%" . $query["state"] . "%");
+        if(!empty($query['since'])) {
+            $stmt->bindValue(":date", date("Y-m-d", strtotime($query["since"])));
+        } else {
+            $stmt->bindValue(":date", "");
+        }
+        if(!empty($query['state'])) {
+            $stmt->bindValue(":status", $query["state"]);
+        } else {
+            $stmt->bindValue(":status", "%");
+        }
+
         $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $currentOrderNumber = $row["order_number"];
@@ -95,7 +104,7 @@ WHERE o.order_number LIKE :order_number ';
      * @param array $queries includes the customer_id at key 'customer_id' and date at the 'since' key.
      * @return array
      */
-    public function getOrdersByCustomerId(array $queries) {
+    public function getOrdersByCustomerId(array $queries): array {
         $result = array();
         $statement = "
             SELECT * FROM `order` 
@@ -162,7 +171,7 @@ WHERE o.order_number LIKE :order_number ';
             $this->db->commit();
         } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
     }
 
@@ -207,7 +216,6 @@ WHERE o.order_number LIKE :order_number ';
      * Cancels the order of a customer.
      * @param array $payload
      * @return bool
-     * @throws Exception
      */
     public function cancelOrder(array $payload): bool {
         $success = false;
@@ -224,7 +232,7 @@ WHERE o.order_number LIKE :order_number ';
         }
         catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
         return $success;
     }
@@ -241,9 +249,8 @@ WHERE o.order_number LIKE :order_number ';
      *               [<ski_type_id>] => <quantity>
      *           )
      *       )
-     * @throws Exception
      */
-    public function addOrder(array $orderedSkis, array $queries): void {
+    public function addOrder(array $orderedSkis): void {
         $total_price = 0;
         try {
             $this->db->beginTransaction();
@@ -259,7 +266,7 @@ WHERE o.order_number LIKE :order_number ';
                 .' VALUES(:total_price, :state, :customer_id, :date)');
             $stmt->bindValue(':total_price', $total_price);
             $stmt->bindValue(':state', "new");
-            $stmt->bindValue(':customer_id', $queries["customer_id"]);
+            $stmt->bindValue(':customer_id', $orderedSkis["customer_id"]);
             $stmt->bindValue(":date", date("Y-m-d"));
             $stmt->execute();
             $lastOrder = $this->db->lastInsertId();
@@ -274,7 +281,7 @@ WHERE o.order_number LIKE :order_number ';
             $this->db->commit();
         } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
     }
 }
