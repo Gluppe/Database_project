@@ -191,6 +191,9 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new ProductionPlanModel();
+                if(empty($uri[2])) {
+                    return array(false);
+                }
                 return $model->getProductionPlan($uri[2]);
             case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();

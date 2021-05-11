@@ -65,13 +65,21 @@ class ProductionPlanModel
         $date = date("Y") . "-" . $month . "-01";
         $date = date($date, strtotime($date));
 
-        $stmt = $this->db->prepare("SELECT ski_type_id, daily_amount FROM production_skis WHERE production_skis.production_plan_month LIKE :month");
+        $query = "SELECT * FROM production_plan WHERE month LIKE :month";
+        $stmt = $this->db->prepare($query);
         $stmt->bindValue(":month", $date);
         $stmt->execute();
         $productionSkisRow = array();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $productionSkisRow[$row["ski_type_id"]] = $row["daily_amount"];
+            $production_plan_id = $row['ID'];
+            $stmt = $this->db->prepare("SELECT ski_type_id, daily_amount FROM production_skis WHERE production_skis.production_plan_id LIKE :production_plan_id");
+            $stmt->bindValue(":production_plan_id", $production_plan_id);
+            $stmt->execute();
+            while($row2 = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $productionSkisRow[$row2["ski_type_id"]] = $row2["daily_amount"];
+            }
         }
+
         $res = array();
         $res['month'] = $month;
         $res['skis'] = $productionSkisRow;
