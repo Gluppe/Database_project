@@ -11,9 +11,6 @@ class PayloadValidation
      */
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool
     {
-        if(empty($payload)) {
-            return false;
-        }
         return match ($requestMethod) {
             RESTConstants::METHOD_PUT, RESTConstants::METHOD_DELETE, RESTConstants::METHOD_GET => true,
             RESTConstants::METHOD_POST => $this->isValidPostPayload($uri, $payload),
@@ -28,6 +25,9 @@ class PayloadValidation
      */
     public function isValidPostPayload(array $uri, array $payload): bool
     {
+        if(empty($payload)) {
+            return false;
+        }
         return match ($uri[0]) {
             RESTConstants::ENDPOINT_CUSTOMER => $this->isValidCustomerPayload($uri, $payload),
             RESTConstants::ENDPOINT_STOREKEEPER => $this->isValidStorekeeperPayload($uri, $payload),

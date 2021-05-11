@@ -63,7 +63,7 @@ if (!$payloadValidation->isValidPayload($uri, $requestMethod, $payload)) {
 try{
     $controller->authorise($token, $uri[0]);
 } catch (Exception $e) {
-    print("A Token is needed");
+    print("A valid token is needed");
     http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     return;
 }
@@ -71,7 +71,6 @@ try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
 
     if (count($res) == 0) {
-        print("No information available");
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
     } else {
         header('Content-Type: application/json');

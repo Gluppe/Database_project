@@ -15,7 +15,6 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
-     * @throws Throwable
      */
     public function handleRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         $endpointUri = $uri[1];
@@ -53,7 +52,7 @@ class APIController
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
                 $endpoint = $uri[0];
-                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && !empty($queries['customer_id'])) {
+                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
                     print("A customer_id query is needed to see your orders");
                     return array(false);
                 } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {

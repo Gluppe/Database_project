@@ -1,7 +1,9 @@
 <?php
 require_once 'dbCredentials.php';
 
-class TransitionHistoryModel{
+class TransitionHistoryModel {
+    protected PDO $db;
+
     public function __construct()
     {
         $this->db = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8',

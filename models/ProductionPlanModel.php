@@ -3,6 +3,8 @@ require_once 'dbCredentials.php';
 
 class ProductionPlanModel
 {
+    protected PDO $db;
+
     public function __construct()
     {
         $this->db = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8',
@@ -32,19 +34,21 @@ class ProductionPlanModel
                 $stmt->execute();
 
                 $lastId = $this->db->lastInsertId();
-                echo $lastId;
                 $stmt2 = $this->db->prepare(
-                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_id) VALUES (:ski_type_id, :daily_amount, :production_plan_month)");
+                    "INSERT INTO production_skis (ski_type_id, daily_amount, production_plan_id) VALUES (:ski_type_id, :daily_amount, :production_plan_id)");
                 foreach ($payload['skis'] as $ski_type_id => $daily_amount) {
                     $stmt2->bindValue(":ski_type_id", $ski_type_id);
                     $stmt2->bindValue(":daily_amount", $daily_amount);
-                    $stmt2->bindValue(":production_plan_month", $date);
+                    $stmt2->bindValue(":production_plan_id", $lastId);
                     $stmt2->execute();
                 }
                 $this->db->commit();
+                print("Successfully added production-plan with id: " . $lastId);
                 $success = true;
             } catch (Exception $e) {
                 $this->db->rollBack();
+                print("Could not add production-plan");
+                error_log($e);
             }
             return $success;
         } else {

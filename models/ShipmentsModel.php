@@ -2,6 +2,7 @@
 
 class ShipmentsModel
 {
+    protected PDO $db;
 
     public function __construct()
     {

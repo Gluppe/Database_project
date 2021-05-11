@@ -3,6 +3,7 @@ require_once 'dbCredentials.php';
 
 class SkisModel
 {
+    protected PDO $db;
 
     public function __construct()
     {
