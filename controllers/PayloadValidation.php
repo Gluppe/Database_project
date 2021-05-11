@@ -11,6 +11,9 @@ class PayloadValidation
      */
     public function isValidPayload(array $uri, string $requestMethod, array $payload): bool
     {
+        if(empty($payload)) {
+            return false;
+        }
         return match ($requestMethod) {
             RESTConstants::METHOD_PUT, RESTConstants::METHOD_DELETE, RESTConstants::METHOD_GET => true,
             RESTConstants::METHOD_POST => $this->isValidPostPayload($uri, $payload),
@@ -46,7 +49,7 @@ class PayloadValidation
                 }
                 foreach ($payload['skis'] as $ski_type_id => $quantity) {
                     $model = new SkisModel();
-                    if (!$model->skiTypeExist($ski_type_id) && !empty($payload['ski_type_id'])) {
+                    if (!$model->skiTypeExist($ski_type_id) || !empty($payload['ski_type_id'])) {
                         return false;
                     }
                     if (!is_int($quantity)) {

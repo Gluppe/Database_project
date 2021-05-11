@@ -35,6 +35,7 @@ $endpointValidation = new EndpointValidation();
 if (!$endpointValidation->isValidEndpoint($uri)) {
     // Endpoint not recognised
     error_log("Not valid endpoint");
+    print("Not valid endpoint");
     http_response_code(RESTConstants::HTTP_NOT_FOUND);
     return;
 }
@@ -42,13 +43,20 @@ $methodValidation = new MethodValidation();
 if (!$methodValidation->isValidMethod($uri, $requestMethod)) {
     // Method not supported
     error_log("Not valid method");
+    print("Not a valid request method");
     http_response_code(RESTConstants::HTTP_METHOD_NOT_ALLOWED);
     return;
 }
 $payloadValidation = new PayloadValidation();
+if(!is_array($payload)) {
+    error_log("Payload is not array");
+    $payload = array();
+    http_response_code(RESTConstants::HTTP_BAD_REQUEST);
+}
 if (!$payloadValidation->isValidPayload($uri, $requestMethod, $payload)) {
     // Payload is incorrectly formatted
     error_log("Not valid payload");
+    print("Not a valid payload");
     http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     return;
 }

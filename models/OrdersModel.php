@@ -290,7 +290,7 @@ WHERE o.order_number LIKE :order_number ';
                 $stmt2->execute();
             }
             $this->db->commit();
-            print("Added order with id: " . $this->db->lastInsertId());
+            print("Added order with id: " . $lastOrder);
         } catch (Exception $e){
             $this->db->rollBack();
             print("Failed adding order");
