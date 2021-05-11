@@ -261,7 +261,7 @@ WHERE o.order_number LIKE :order_number ';
      *           )
      *       )
      */
-    public function addOrder(array $orderedSkis, $queries): void {
+    public function addOrder(array $orderedSkis, array $queries): void {
         $total_price = 0;
         try {
             $this->db->beginTransaction();
