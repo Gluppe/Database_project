@@ -261,7 +261,7 @@ WHERE o.order_number LIKE :order_number ';
      *           )
      *       )
      */
-    public function addOrder(array $orderedSkis): void {
+    public function addOrder(array $orderedSkis, $queries): void {
         $total_price = 0;
         try {
             $this->db->beginTransaction();
@@ -277,7 +277,7 @@ WHERE o.order_number LIKE :order_number ';
                 .' VALUES(:total_price, :state, :customer_id, :date)');
             $stmt->bindValue(':total_price', $total_price);
             $stmt->bindValue(':state', "new");
-            $stmt->bindValue(':customer_id', $orderedSkis["customer_id"]);
+            $stmt->bindValue(':customer_id', $queries["customer_id"]);
             $stmt->bindValue(":date", date("Y-m-d"));
             $stmt->execute();
             $lastOrder = $this->db->lastInsertId();
@@ -290,8 +290,10 @@ WHERE o.order_number LIKE :order_number ';
                 $stmt2->execute();
             }
             $this->db->commit();
+            print("Added order with id: " . $this->db->lastInsertId());
         } catch (Exception $e){
             $this->db->rollBack();
+            print("Failed adding order");
             error_log($e);
         }
     }

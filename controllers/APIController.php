@@ -22,7 +22,7 @@ class APIController
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
                 if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                    print("A customer_id query is needed to see your orders");
+                    print("A customer_id query is needed");
                     return array();
                 } else if(empty($uri[2])) {
                     return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
@@ -64,7 +64,7 @@ class APIController
                 return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
-                $model->addOrder($payload);
+                $model->addOrder($payload, $queries);
                 return array(true);
         }
         return array();
