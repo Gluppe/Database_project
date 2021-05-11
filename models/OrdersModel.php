@@ -70,10 +70,47 @@ WHERE o.order_number LIKE :order_number ';
               ";
 
         $stmt = $this->db->prepare($statement);
-        $stmt->bindValue(':orderNumber',  $uri[2] . "%");
+        $stmt->bindValue(':orderNumber',  $uri[2]);
         $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
         $stmt->bindValue(":dato", date("Y-m-d", strtotime($query["since"])));
         $stmt->bindValue(":status", "%" . $query["state"] . "%");
+        $stmt->execute();
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $currentOrderNumber = $row["order_number"];
+
+            $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
+            $stmt2->bindValue(":current_ON", $currentOrderNumber);
+            $stmt2->execute();
+            $orderSkisRow = array();
+            while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+                $orderSkisRow[$row2["ski_type_id"]] = $row2["quantity"];
+            }
+            $row["skiType_quantity"] = $orderSkisRow;
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    /** Gets all orders by customer id with optional since filter
+     * @param array $queries includes the customer_id at key 'customer_id' and date at the 'since' key.
+     * @return array
+     */
+    public function getOrdersByCustomerId(array $queries) {
+        $result = array();
+        $statement = "
+            SELECT * FROM `order` 
+            WHERE customer_id LIKE :customer_id";
+        if(!empty($queries['since'])) {
+            $statement = $statement . " AND date >= :date";
+        }
+
+        $stmt = $this->db->prepare($statement);
+        $stmt->bindValue(':customer_id',  $queries['customer_id']);
+        if(!empty($queries['since'])) {
+            $date = $queries['since'];
+            $date = date($date, strtotime($date));
+            $stmt->bindValue(':date',  $date);
+        }
         $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $currentOrderNumber = $row["order_number"];

@@ -53,7 +53,11 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrder(array(), $queries);
+                if($uri[0] == "customer" && $queries['customer_id'] == "") {
+                    print("A customer_id query is needed to see your orders");
+                    return array(false);
+                }
+                return $model->getOrdersByCustomerId($queries);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 $model->addOrder($payload, $queries);
