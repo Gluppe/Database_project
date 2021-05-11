@@ -40,17 +40,17 @@ class PDOTest extends Unit {
      * ski_type_id 3 so the seeInDatabase wont find an already existing ski
      * @todo Make sure the database cleans up after each test
     */
-    public function testAddSKiNewSKiByType() {
+    public function testAddSkiByType() {
         $SkisModel = new skisModel();
         $SkisModel->addSki(array('ski_type_id' => 1));
 
         $res = $SkisModel->getLastInsertedSki();
 
-        if ($res[0]['production_number'] = '1') {
+        if ($res[0]['ski_type_id'] == '1') {
             $test1 = $res[0];
         }
 
-        $this->tester->assertEquals('1',  $test1['production_number']);
+        $this->tester->assertEquals('1',  $test1['ski_type_id']);
     }
 
 
@@ -66,7 +66,7 @@ class PDOTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['production_number'] = '1') {
+        if ($res[0]['production_number'] == '1') {
             $test1 = $res[0];
         }
 
@@ -83,12 +83,11 @@ class PDOTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['grip_system'] = 'wax') {
+        if ($res[0]['grip_system'] == 'wax') {
             $test1 = $res[0];
         }
 
         $this->tester->assertEquals('wax', $test1['grip_system']);
     }
-
 
 }

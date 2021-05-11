@@ -33,6 +33,8 @@ class OrdersModelTest extends Unit {
         if ($res[0]['production_number'] = '1') {
             $test1 = $res[0];
         }
+
+        $this->tester->assertEquals('1', $test1['production_number']);
     }
 
     public function testCancelOrderByOrderNumber() {
@@ -40,19 +42,19 @@ class OrdersModelTest extends Unit {
         $OrdersModel->cancelOrder(array('order_number' => 428, 'customer_id' => 10));
         $res = $OrdersModel->getOrder(array('order_number' => 428, 'customer_id' => 10));
 
-        if($res[0]['state'] = 'cancled') {
+        if($res[0]['state'] == 'cancled') {
             $test1 = $res[0];
         }
 
         $this->tester->assertEquals('canceled', $test1['state']);
     }
 
-    public function updateOrderShipmentNumber() {
+    public function testUpdateOrderShipmentNumber() {
         $OrdersModel = new OrdersModel();
         $OrdersModel->updateOrder(array(12));
         $res = $OrdersModel->getOrder();
 
-        if($res[0]['shipment_number'] = 12) {
+        if($res[0]['shipment_number'] == 12) {
             $test1 = res[0];
         }
 

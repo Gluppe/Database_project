@@ -28,17 +28,17 @@ class ShipmentsModelTest extends Unit
      * Test for getting a shipment. Shipmentmodel returns an array. take the first
      * index in the array and check if the shipment number is the same as your imput.
      */
-    public function getAllShipmentByShipmentNumber() {
-        $SkisModel = new skisModel();
+    public function testGeShipmentByShipmentNumber() {
+        $ShipmentsModel = new ShipmentsModel();
 
-        $res = $SkisModel->getShipment('1');
+        $res = $ShipmentsModel->getShipment(array('100'));
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['shipment_number'] = '1') {
+        if ($res[0]['shipment_number'] == '100') {
             $test1 = $res[0];
         }
 
-        $this->tester->assertEquals('1', $test1['shipment_number']);
+        $this->tester->assertEquals('100', $test1['shipment_number']);
     }
 }
