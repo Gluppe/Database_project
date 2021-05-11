@@ -18,6 +18,7 @@ localhost:8080/storekeeper/
 localhost:8080/customer-rep/
 ```
 `{:value}` indicates a mandatory input paramater
+
 `{value}` indicates optional input
 
 ### Public Endpoint
@@ -35,7 +36,7 @@ This endpoint will give you a list of all ski-types, you can also filter these b
 Method: GET
 localhost:8080/public/ski-types{?grip={:grip_type}}{?model={:model}}
 ```
-`{?grip={:string}}` and `{?model={:string}}` indicates optional queries.
+`{?grip={:string}}` and `{?model={:string}}` are optional queries.
 
 
 ### Customer Endpoints
