@@ -53,15 +53,15 @@ class APIController
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
                 $endpoint = $uri[0];
-                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && $queries['customer_id'] == "") {
+                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && !empty($queries['customer_id'])) {
                     print("A customer_id query is needed to see your orders");
                     return array(false);
-                } else if($endpoint == RESTConstants::ENDPOINT_STOREKEEPER) {
-
-                } else {
+                } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
+                    return $model->getOrder($uri, $queries);
+                } else if($endpoint == RESTConstants::ENDPOINT_CUSTOMER) {
+                    return $model->getOrdersByCustomerId($queries);
                 }
-                return $model->getOrdersByCustomerId($queries);
-
+                return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 $model->addOrder($payload);

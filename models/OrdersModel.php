@@ -65,18 +65,29 @@ WHERE o.order_number LIKE :order_number ';
             SELECT * FROM `order` 
             WHERE (order_number LIKE :orderNumber) 
               AND (customer_id LIKE :customerNumber)
-              AND (`order`.date > :date ) 
+              AND (`order`.date >= :date ) 
               AND (`order`.state LIKE :status)
               ";
 
         $stmt = $this->db->prepare($statement);
-        $stmt->bindValue(':orderNumber',  $uri[2]);
-        $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
+        if(!empty($uri[2])) {
+            $stmt->bindValue(':orderNumber',  $uri[2]);
+        } else {
+            $stmt->bindValue(':orderNumber',  "%");
+        }
+
+        if(!empty($query['customer_id'])) {
+            $stmt->bindValue(":customerNumber", $query["customer_id"]);
+        } else {
+            $stmt->bindValue(":customerNumber", "%");
+        }
+
         if(!empty($query['since'])) {
             $stmt->bindValue(":date", date("Y-m-d", strtotime($query["since"])));
         } else {
             $stmt->bindValue(":date", "");
         }
+
         if(!empty($query['state'])) {
             $stmt->bindValue(":status", $query["state"]);
         } else {
