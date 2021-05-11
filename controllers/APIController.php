@@ -87,8 +87,7 @@ class APIController
                 } else if ($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['status']) && empty($queries['since'])) {
                     return $model->getOrder($uri, $queries);
                 }
-                return array(false);
-
+                return array();
             case RESTConstants::METHOD_PATCH:
                 $model = new OrdersModel();
                 $success = $model->updateOrder($uri, $payload);
@@ -133,10 +132,10 @@ class APIController
                 $model = new SkisModel();
                 if(empty($uri[2])) {
                     return $model->getSkis();
-                } else if((int)$uri[2] != 0){
+                } else if((int)$uri[2] > 0){
                     return $model->getSki($uri[2]);
                 } else {
-                    return array();
+                    return array(false);
                 }
 
             case RESTConstants::METHOD_POST:

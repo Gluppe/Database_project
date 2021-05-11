@@ -73,17 +73,17 @@ class PayloadValidation
                     $ski_type_id = $payload['ski_type_id'];
 
                     if ((int)$ski_type_id == 0 && is_int((int)$ski_type_id)) {
-                        print("\"ski_type_id\" must be a valid number");
+                        print("\"ski_type_id\" must be a valid number\n");
                         return false;
                     }
                     if ((new SkisModel())->skiTypeExist($ski_type_id)) {
                         return true;
                     } else {
-                        print("Ski type with id " . $ski_type_id . " does not exist");
+                        print("Ski type with id " . $ski_type_id . " does not exist\n");
                         return false;
                     }
                 }
-                print("Body must contain a valid \"ski-type-id\" field");
+                print("Body must contain a valid \"ski-type-id\" field\n");
                 return false;
             default:
                 return false;

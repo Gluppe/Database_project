@@ -72,6 +72,9 @@ try {
 
     if (count($res) == 0) {
         http_response_code(RESTConstants::HTTP_NOT_FOUND);
+    } else if(!$res[0]) {
+        print("Bad request");
+        http_response_code(RESTConstants::HTTP_BAD_REQUEST);
     } else {
         header('Content-Type: application/json');
         switch ($requestMethod) {
