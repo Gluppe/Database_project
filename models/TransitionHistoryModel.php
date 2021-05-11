@@ -31,6 +31,11 @@ class TransitionHistoryModel{
         }
     }
 
+    /**
+     * Finds the current state of an order
+     * @param int $orderNumber Number of the order
+     * @return array An array wher Index 0 = the state of the order
+     */
     public function getCurrentOrderState(int $orderNumber): array {
         $res = array();
 
@@ -42,6 +47,26 @@ class TransitionHistoryModel{
             $res[] = $row;
         }
         return $res;
+    }
+
+    /**
+     * Finds the last inserted transition history
+     * It is an auto increment so the last descending transition_history_id
+     * will always be the latest added
+     * @return array the ski as an array
+     */
+    public function getLastInsertedTransitionHistory(): array {
+        $res = array();
+
+        $query = 'SELECT * FROM transition_history ORDER BY transition_history_id DESC LIMIT 1';
+
+        $stmt = $this->db->query($query);
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+
     }
 
 }
