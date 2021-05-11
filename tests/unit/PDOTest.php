@@ -25,6 +25,17 @@ class PDOTest extends Unit {
     }
 
     /**
+     * Gets all the skis in the database and compares them to an expected number
+     * With a consistant test set this number will be correct as this is the first test run
+     */
+    public function testGetAllSkis() {
+        $SkisModel = new skisModel();
+
+        $expectedCount = 23;
+        $this->assertCount($expectedCount, $SkisModel->getSkis());
+    }
+
+    /**
      * A unit test for adding a new ski, make sure there are no skis of
      * ski_type_id 3 so the seeInDatabase wont find an already existing ski
      * @todo Make sure the database cleans up after each test
@@ -33,9 +44,13 @@ class PDOTest extends Unit {
         $SkisModel = new skisModel();
         $SkisModel->addSki(array('ski_type_id' => 1));
 
-        $Last_id = mysqli_insert_id();
+        $res = $SkisModel->getLastInsertedSki();
 
-        $this->tester->assertEquals('1',  $SkisModel->getSki($Last_id));
+        if ($res[0]['production_number'] = '1') {
+            $test1 = $res[0];
+        }
+
+        $this->tester->assertEquals('1',  $test1['production_number']);
     }
 
 
@@ -56,13 +71,6 @@ class PDOTest extends Unit {
         }
 
         $this->tester->assertEquals('1', $test1['production_number']);
-    }
-
-    public function testGetAllSkis() {
-        $SkisModel = new skisModel();
-
-        $expectedCount = 2;
-        $this->assertCount($expectedCount, $SkisModel->getSkis());
     }
 
     /**
