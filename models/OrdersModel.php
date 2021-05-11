@@ -65,15 +65,72 @@ WHERE o.order_number LIKE :order_number ';
             SELECT * FROM `order` 
             WHERE (order_number LIKE :orderNumber) 
               AND (customer_id LIKE :customerNumber)
-              AND (`order`.date > :dato ) 
+              AND (`order`.date >= :date ) 
               AND (`order`.state LIKE :status)
               ";
 
         $stmt = $this->db->prepare($statement);
-        $stmt->bindValue(':orderNumber',  $uri[2] . "%");
-        $stmt->bindValue(":customerNumber", "%" . $query["customer_id"] . "%");
-        $stmt->bindValue(":dato", date("Y-m-d", strtotime($query["since"])));
-        $stmt->bindValue(":status", "%" . $query["state"] . "%");
+        if(!empty($uri[2])) {
+            $stmt->bindValue(':orderNumber',  $uri[2]);
+        } else {
+            $stmt->bindValue(':orderNumber',  "%");
+        }
+
+        if(!empty($query['customer_id'])) {
+            $stmt->bindValue(":customerNumber", $query["customer_id"]);
+        } else {
+            $stmt->bindValue(":customerNumber", "%");
+        }
+
+        if(!empty($query['since'])) {
+            $stmt->bindValue(":date", date("Y-m-d", strtotime($query["since"])));
+        } else {
+            $stmt->bindValue(":date", "");
+        }
+
+        if(!empty($query['state'])) {
+            $stmt->bindValue(":status", $query["state"]);
+        } else {
+            $stmt->bindValue(":status", "%");
+        }
+
+        $stmt->execute();
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $currentOrderNumber = $row["order_number"];
+
+            $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
+            $stmt2->bindValue(":current_ON", $currentOrderNumber);
+            $stmt2->execute();
+            $orderSkisRow = array();
+            while($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+                $orderSkisRow[$row2["ski_type_id"]] = $row2["quantity"];
+            }
+            $row["skiType_quantity"] = $orderSkisRow;
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    /** Gets all orders by customer id with optional since filter
+     * @param array $queries includes the customer_id at key 'customer_id' and date at the 'since' key.
+     * @return array
+     */
+    public function getOrdersByCustomerId(array $queries): array {
+        $result = array();
+        $statement = "
+            SELECT * FROM `order` 
+            WHERE customer_id LIKE :customer_id";
+        if(!empty($queries['since'])) {
+            $statement = $statement . " AND date >= :date";
+        }
+
+        $stmt = $this->db->prepare($statement);
+        $stmt->bindValue(':customer_id',  $queries['customer_id']);
+        if(!empty($queries['since'])) {
+            $date = $queries['since'];
+            $date = date($date, strtotime($date));
+            $stmt->bindValue(':date',  $date);
+        }
         $stmt->execute();
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $currentOrderNumber = $row["order_number"];
@@ -125,7 +182,7 @@ WHERE o.order_number LIKE :order_number ';
             $this->db->commit();
         } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
     }
 
@@ -170,7 +227,6 @@ WHERE o.order_number LIKE :order_number ';
      * Cancels the order of a customer.
      * @param array $payload
      * @return bool
-     * @throws Exception
      */
     public function cancelOrder(array $payload): bool {
         $success = false;
@@ -187,7 +243,7 @@ WHERE o.order_number LIKE :order_number ';
         }
         catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            error_log($e);
         }
         return $success;
     }
@@ -204,7 +260,6 @@ WHERE o.order_number LIKE :order_number ';
      *               [<ski_type_id>] => <quantity>
      *           )
      *       )
-     * @throws Exception
      */
     public function addOrder(array $orderedSkis, array $queries): void {
         $total_price = 0;
@@ -235,9 +290,11 @@ WHERE o.order_number LIKE :order_number ';
                 $stmt2->execute();
             }
             $this->db->commit();
+            print("Added order with id: " . $lastOrder);
         } catch (Exception $e){
             $this->db->rollBack();
-            throw $e;
+            print("Failed adding order");
+            error_log($e);
         }
     }
 }

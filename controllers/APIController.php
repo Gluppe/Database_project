@@ -15,14 +15,13 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
-     * @throws Throwable
      */
     public function handleRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         $endpointUri = $uri[1];
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
                 if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                    print("A customer_id query is needed to see your orders");
+                    print("A customer_id query is needed");
                     return array();
                 } else if(empty($uri[2])) {
                     return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
@@ -47,13 +46,21 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
-     * @throws Throwable
      */
     protected function handleOrdersRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrder(array(), $queries);
+                $endpoint = $uri[0];
+                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
+                    print("A customer_id query is needed to see your orders");
+                    return array(false);
+                } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
+                    return $model->getOrder($uri, $queries);
+                } else if($endpoint == RESTConstants::ENDPOINT_CUSTOMER) {
+                    return $model->getOrdersByCustomerId($queries);
+                }
+                return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 $model->addOrder($payload, $queries);
@@ -68,19 +75,26 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
-     * @throws Throwable
      */
     protected function handleOrderRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new OrdersModel();
-                return $model->getOrder($uri, $queries);
+                $endpoint = $uri[0];
+                if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
+                    print("A customer_id query is needed to see your orders");
+                    return array(false);
+                } else if ($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['status']) && empty($queries['since'])) {
+                    return $model->getOrder($uri, $queries);
+                }
+                return array();
             case RESTConstants::METHOD_PATCH:
                 $model = new OrdersModel();
                 $success = $model->updateOrder($uri, $payload);
                 if($success) {
                     print("the order was successfully updated\n");
-                    if($uri[0] == "shipper" || $uri[0] == "storekeeper") {
+                    $endpoint = $uri[0];
+                    if($endpoint == RESTConstants::ENDPOINT_SHIPPER || $endpoint == RESTConstants::ENDPOINT_STOREKEEPER) {
                         $model = new TransitionHistoryModel();
                         $model->addTransitionHistory($uri[2], $payload['state']);
                     }
@@ -111,7 +125,6 @@ class APIController
      * @param array $queries contains the queries used
      * @param array $payload contains the payload
      * @return array returns an array of the information gotten from the database
-     * @throws Throwable
      */
     protected function handleSkisRequest(array $uri, string $requestMethod, array $queries, array $payload): array {
         switch($requestMethod) {
@@ -119,10 +132,10 @@ class APIController
                 $model = new SkisModel();
                 if(empty($uri[2])) {
                     return $model->getSkis();
-                } else if((int)$uri[2] != 0){
+                } else if((int)$uri[2] > 0){
                     return $model->getSki($uri[2]);
                 } else {
-                    return array();
+                    return array(false);
                 }
 
             case RESTConstants::METHOD_POST:
@@ -176,6 +189,9 @@ class APIController
         switch($requestMethod) {
             case RESTConstants::METHOD_GET:
                 $model = new ProductionPlanModel();
+                if(empty($uri[2])) {
+                    return array(false);
+                }
                 return $model->getProductionPlan($uri[2]);
             case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();
