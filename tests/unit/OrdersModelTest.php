@@ -30,11 +30,7 @@ class OrdersModelTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['production_number'] = '1') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('1', $test1['production_number']);
+        $this->tester->assertEquals('1', $res[0]['production_number']);
     }
 
     public function testCancelOrderByOrderNumber() {
@@ -42,23 +38,20 @@ class OrdersModelTest extends Unit {
         $OrdersModel->cancelOrder(array('order_number' => 428, 'customer_id' => 10));
         $res = $OrdersModel->getOrder(array('order_number' => 428, 'customer_id' => 10));
 
-        if($res[0]['state'] == 'cancled') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('canceled', $test1['state']);
+        $this->tester->assertEquals('canceled', $res[0]['state']);
     }
 
-    public function testUpdateOrderShipmentNumber() {
+    /**
+     * A test for updating the shipment number and state in an order
+     * It uses getOrder with the same order_number as the input and compares them
+     */
+    public function testUpdateOrderStateAndShipmentNumber() {
         $OrdersModel = new OrdersModel();
-        $OrdersModel->updateOrder(array(12));
-        $res = $OrdersModel->getOrder();
+        $OrdersModel->updateOrder(array('order_number' => '1'), array('state' => 'ready to be shipped', 'shipment_number' => '200'));
+        $res = $OrdersModel->getOrder(array('order_number' => '1'));
 
-        if($res[0]['shipment_number'] == 12) {
-            $test1 = res[0];
-        }
-
-        $this->testerassertEquals(12, $test1);
+        $this->testerassertEquals('200', $res[0]['shipment_number']);
+        $this->testerassertEquals('ready to be shipped', $res[0]['state']);
     }
 
 

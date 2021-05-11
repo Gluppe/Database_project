@@ -35,10 +35,6 @@ class ShipmentsModelTest extends Unit
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['shipment_number'] == '100') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('100', $test1['shipment_number']);
+        $this->tester->assertEquals('100', $res[0]['shipment_number']);
     }
 }

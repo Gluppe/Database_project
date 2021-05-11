@@ -46,11 +46,7 @@ class PDOTest extends Unit {
 
         $res = $SkisModel->getLastInsertedSki();
 
-        if ($res[0]['ski_type_id'] == '1') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('1',  $test1['ski_type_id']);
+        $this->tester->assertEquals('1',  $res[0]['ski_type_id']);
     }
 
 
@@ -66,11 +62,7 @@ class PDOTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['production_number'] == '1') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('1', $test1['production_number']);
+        $this->tester->assertEquals('1', $res[0]['production_number']);
     }
 
     /**
@@ -83,11 +75,7 @@ class PDOTest extends Unit {
 
         $this->tester->assertIsArray($res);
 
-        if ($res[0]['grip_system'] == 'wax') {
-            $test1 = $res[0];
-        }
-
-        $this->tester->assertEquals('wax', $test1['grip_system']);
+        $this->tester->assertEquals('wax', $res[0]['grip_system']);
     }
 
 }
