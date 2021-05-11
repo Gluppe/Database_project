@@ -5,10 +5,17 @@ require_once 'models/SkisModel.php';
 $model = new OrdersModel();
 $model = new SkisModel();
 
-$text = $model->getLastInsertedSki();
+$customer_id = "";
+$order_number = "";
+$state = "";
+$date = "";
+$payload = array("customer_id"=> $customer_id, "since"=>$date, "state"=>$state);
+$uri = array("", "", $order_number);
 
-foreach($text[0] as $try) {
-    print $try ;
+try {
+    print_r($model->getOrder($uri,$payload));
+} catch (Throwable $e) {
+    print_r($e);
 }
 
 //print_r($array);
