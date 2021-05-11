@@ -52,10 +52,6 @@ WHERE o.order_number LIKE :order_number ';
         return $result;
     }
 
-
-
-
-
     /**
      * Method will return an order that matches the order_number parameter.
      * @param array $query      Array query:
@@ -97,10 +93,44 @@ WHERE o.order_number LIKE :order_number ';
 
     /*
      * Får inn orderenummer
-     * skal finne antall produserte og available ski :
-     *      Gi dem ett orderenummer og sette dem til unavailable.
-     *      Opprette nytt orderenummer på
+     * finn antall ski som bestilles innen skityper.
+     *  finn antall ski som er gitt ordrenummer
+     *  opprett nytt ordrenummer på dette antallet.
      */
+
+    public function splitOrder(array $query){
+        try {
+            $this->db->beginTransaction();
+            $stmt = $this->db->prepare(
+                'select order_skis.*, `order`.customer_id from order_skis
+                        LEFT JOIN `order`
+                        on order_skis.order_number = `order`.order_number as 
+                        where order_number LIKE :orderNumber and customer_id like :customerID');
+            $stmt->bindValue(':customerID', $query["customer_id"]);
+            $stmt->bindValue(":orderNumber", $query["order_number"]);
+            $stmt->execute();
+            $stmt2 = $this->db->prepare(
+                "select count(order_no) 
+                        from ski
+                        where (available like 1) 
+                          and (ski_type_id like :stid) 
+                          and (order_no like :order_no)
+                        ");
+            foreach ($query["skis"] as $id => $id_value){
+                $stmt2->bindValue(":skiTypeId", $id);
+                $stmt2->bindValue(":quantity", $id_value);
+                $stmt2->bindValue(":order_number", $lastOrder);
+                $stmt2->execute();
+            }
+            $this->db->commit();
+        } catch (Exception $e){
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+
+
 
     /**
      * Method will update the order that matches the orderNumber parameter with the new values provided by the other parameters.

@@ -8,6 +8,6 @@ actor: AcceptanceTester
 modules:
     enabled:
         - PhpBrowser:
-            url: http://localhost/phpmyadmin/ski_manufacturer
+            url: http://localhost/phpmyadmin/ski_manufacturerdb
         - \Helper\Acceptance
 step_decorators: ~        
