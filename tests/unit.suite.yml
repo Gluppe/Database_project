@@ -8,8 +8,9 @@ modules:
         - Asserts
         - \Helper\Unit
         - Db:
-           dsn: 'mysql:host=localhost;dbname=ski_manufacturerdb'
+           dsn: 'mysql:host=localhost;dbname=testdb'
            user: 'root'
            password: ''
-           dump: 'tests/_data/ski_manufacturerdb.sql'
-    step_decorators: ~        
+           dump: tests/_data/testdb.sql
+           populate: true
+           cleanup: true

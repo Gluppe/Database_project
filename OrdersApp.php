@@ -1,7 +1,9 @@
 <?php
 require_once 'models/OrdersModel.php';
+require_once 'models/SkisModel.php';
 
 $model = new OrdersModel();
+$model = new SkisModel();
 
 $customer_id = "";
 $order_number = "";

@@ -11,10 +11,23 @@ class SkisModel
             array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     }
 
-    /** A method to get a list of skis by model
+    /** A method to get a list of all the ski types
+     * @return array An array of all the ski types in the database
+     */
+    public function getSkiTypes(): array {
+        $res = array();
+        $query = 'SELECT * FROM ski_type';
+
+        $stmt = $this->db->query($query);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+    }
+    /** A method to get a list of ski types by model
      * @param array $queries
      * Index 0 = model
-     * @return array An array of skis of this model
+     * @return array An array of ski types of this model
      */
     public function getSkiTypesByModel(array $queries): array
     {
@@ -33,10 +46,10 @@ class SkisModel
         return $res;
     }
 
-    /** A method to get a list of skis by grip system
+    /** A method to get a list of ski types by grip system
      * @param array $queries grip system in ski_type
      * Index 0 = grip_system
-     * @return array Array of skis with this grip system
+     * @return array Array of ski types with this grip system
      */
     public function getSkiTypesByGripSystem(array $queries): array
     {
@@ -98,27 +111,25 @@ class SkisModel
     }
 
     /**
-     * A function that changes the values og available and order_no for a ski
+     * A function that changes the values of available and order_no for a ski
      * using an update SQL statement
-     * @param array $payload The array we receive with available and order_no parameters
-     * index 0 = available
-     * index 1 = order_no
-     * @return bool Returns if the update function was sucsessful enough
+     * @param array $queries the user requested queries including the order number
+     * @return bool Returns if the update function was successful enough
      */
-    public function updateSki(array $payload): bool
+    public function addSkiToOrder(array $queries): bool
     {
 
         $success = false;
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare('UPDATE ski SET  available = :available, order_no = :order_no WHERE production_number LIKE production_number');
-            $stmt->bindValue(":available", $payload['available']);
-            $stmt->bindValue(":order_no", $payload['order_number']);
+            $stmt->bindValue(":available", 0);
+            $stmt->bindValue(":order_no", $queries['order_number']);
             $stmt->execute();
             $success = true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
-            throw $e;
+            print($e);
         }
         return $success;
     }
@@ -145,17 +156,18 @@ class SkisModel
             $stmt->execute();
             $this->db->commit();
             $success = true;
-        } catch (Throwable $e) {
+        } catch (Exception $e) {
             $this->db->rollBack();
-            throw $e;
+            print($e);
         }
         return $success;
     }
 
     /** Checks if a ski type exists
-     * @param int $ski_type_id the id of the ski type
+     * @param string $ski_type_id the id of the ski type
+     * @return bool true if ski type exist, false otherwise
      */
-    public function skiTypeExist(int $ski_type_id): bool
+    public function skiTypeExist(string $ski_type_id): bool
     {
 
         $query = 'SELECT COUNT(1) FROM ski_type WHERE ID = :ski_type_id;';
@@ -166,5 +178,25 @@ class SkisModel
 
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         return $res["COUNT(1)"];
+    }
+
+    /**
+     * Finds the last inserted ski
+     * It is an auto increment so the last descending production_number
+     * will always be the latest added
+     * @return array the ski as an array
+     */
+    public function getLastInsertedSki(): array {
+        $res = array();
+
+        $query = 'SELECT * FROM ski ORDER BY production_number DESC LIMIT 1';
+
+        $stmt = $this->db->query($query);
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+
     }
 }
