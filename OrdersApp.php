@@ -1,16 +1,14 @@
 <?php
 require_once 'models/OrdersModel.php';
+require_once 'models/SkisModel.php';
 
 $model = new OrdersModel();
+$model = new SkisModel();
 
-$customer_id = 10;
-$order_number = 1;
-$payload = array("customer_id"=> $customer_id);
+$text = $model->getLastInsertedSki();
 
-try {
-    print_r($model->getOrderByCustomerId($payload));
-} catch (Throwable $e) {
-    print_r($e);
+foreach($text[0] as $try) {
+    print $try ;
 }
 
 //print_r($array);

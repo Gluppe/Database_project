@@ -179,4 +179,24 @@ class SkisModel
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         return $res["COUNT(1)"];
     }
+
+    /**
+     * Finds the last inserted ski
+     * It is an auto increment so the last descending production_number
+     * will always be the latest added
+     * @return array the ski as an array
+     */
+    public function getLastInsertedSki(): array {
+        $res = array();
+
+        $query = 'SELECT * FROM ski ORDER BY production_number DESC LIMIT 1';
+
+        $stmt = $this->db->query($query);
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $res[] = $row;
+        }
+        return $res;
+
+    }
 }
