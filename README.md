@@ -21,7 +21,7 @@ localhost:8080/customer-rep/
 
 `{value}` indicates optional input
 
-### Public Endpoint
+## Public Endpoint
 
 There is only one public endpoint
 
@@ -31,7 +31,7 @@ localhost:8080/public/ski-types
 
 This endpoint will give you a list of all ski-types, you can also filter these based on the grip type or the model.
 
-##### - Request
+#### - Request
 ```
 Method: GET
 localhost:8080/public/ski-types{?grip={:grip_type}}{?model={:model}}
@@ -39,7 +39,7 @@ localhost:8080/public/ski-types{?grip={:grip_type}}{?model={:model}}
 `{?grip={:string}}` and `{?model={:string}}` are optional queries.
 
 
-### Customer Endpoints
+## Customer Endpoints
 
 There are two customer endpoints:
 ```
@@ -47,12 +47,12 @@ localhost:8080/customer/orders/
 localhost:8080/customer/production-plan/
 ```
 
-#### Orders
+### Orders
 This endpoint allows the customer to get their orders, create new orders, cancel orders and split orders.
 
-##### - Requests
+#### - Requests
 
-###### Get specific order:
+##### Get specific order:
 ```
 Method: GET
 localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
@@ -62,7 +62,7 @@ localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
 Example request: `localhost:8080/customer/orders/10?customer_id=500`
 
 
-###### Get all orders for a customer, with optional since filter:
+##### Get all orders for a customer, with optional since filter:
 ```
 Method: GET
 localhost:8080/customer/orders{?customer_id={:id}}{?since={:date}}
@@ -72,7 +72,7 @@ localhost:8080/customer/orders{?customer_id={:id}}{?since={:date}}
 
 Example request: `localhost:8080/customer/orders?customer_id=500&since=2020-01-01`
 
-###### Creates a new order:
+##### Creates a new order:
 ```
 Method: POST
 localhost:8080/customer/orders{?customer_id={:id}}
@@ -100,7 +100,7 @@ Example body:
 ```
 This example request would create an order with 50 skis with ski type id 1, 100 skis with ski type id 2, and 150 skis with ski type id 3.
 
-###### Delete an order:
+##### Delete an order:
 ```
 Method: DELETE
 localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
@@ -110,15 +110,15 @@ localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
 
 Example request: `localhost:8080/customer/orders/10?customer_id=5`
 
-###### Split an order:
+##### Split an order:
 
 TODO: make this
 
-#### Production Plan
+### Production Plan
 
 This endpoint allows the customer to see a production plan summary of a choosen month
 
-##### - Request
+#### - Request
 
 ```
 Method: GET
@@ -129,7 +129,7 @@ localhost:8080/customer/production-plan/{month}
 Example request: `localhost:8080/customer/production-plan/5`
 
 
-### Shipper endpoint
+## Shipper endpoint
 The shipper has one endpoint:
 ```
 localhost:8080/shipper/orders
@@ -138,15 +138,15 @@ localhost:8080/shipper/orders
 This endpoint allows a shipper to update the status of an order from ready-for-shipping to shipped.
 It also allows the shipper to see information about orders ready for shipment
 
-##### - Requests
+#### - Requests
 
-###### Get all orders ready for shipment:
+##### Get all orders ready for shipment:
 ```
 Method: GET
 localhost:8080/shipper/orders
 ```
 
-###### Update the state of an order:
+##### Update the state of an order:
 ```
 Method: PATCH
 localhost:8080/shipper/orders/{order_number}
@@ -154,7 +154,7 @@ localhost:8080/shipper/orders/{order_number}
 `{order_number}` is a mandatory parameter
 
 
-### Planner endpoint
+## Planner endpoint
 
 There is only one planner endpoint:
 
@@ -163,7 +163,7 @@ localhost:8080/planner/production-plan
 ```
 This endpoint allows a production planner to add a production plan.
 
-##### - Request
+#### - Request
 
 ```
 Method: POST
@@ -189,7 +189,7 @@ Example body:
 }
 ```
 
-### Storekeeper endpoints
+## Storekeeper endpoints
 
 There are two storekeeper endpoints:
 ```
@@ -197,10 +197,10 @@ localhost:8080/storekeeper/skis
 localhost:8080/storekeeper/orders
 ```
 
-#### Skis
+### Skis
 This endpoint allows a storekeeper to add a new ski
 
-###### - Request
+##### - Request
 ```
 Method: POST
 localhost:8080/storekeeper/skis
@@ -219,10 +219,10 @@ Body:
 }
 ```
 
-#### Orders
+### Orders
 This endpoint allows a storekeeper to update the state of the order
 
-##### - Requests
+#### - Requests
 
 ```
 Method: PATCH
@@ -230,16 +230,16 @@ localhost:8080/storekeeper/orders/{order_number}
 ```
 `{order_number}` is a mandatory parameter
 
-### Customer rep endpoints
+## Customer rep endpoints
 There is one customer rep endpoint:
 ```
 localhost:8080/customer-rep/orders
 ```
 This endpoint allows the customer rep to retrieve orders and update the state of an order.
 
-#### - Requests
+### - Requests
 
-###### Gets all orders with a state filter:
+##### Gets all orders with a state filter:
 ```
 Method: GET
 localhost:8080/customer-rep/orders{?state={:state}}
@@ -247,7 +247,7 @@ localhost:8080/customer-rep/orders{?state={:state}}
 `{?state={:state}}` is an optional query used to get only orders of a certain state
 
 
-###### Update the state of an order:
+##### Update the state of an order:
 ```
 Method: PATCH
 localhost:8080/storekeeper/orders/{order_number}
