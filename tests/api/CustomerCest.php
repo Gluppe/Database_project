@@ -6,7 +6,6 @@ class CustomerCest
     {
     }
 
-
     public function getAllOrdersByCustomerIdCustomerEndpoint(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
         $I->sendGet('/customer/orders?customer_id=10');
@@ -30,5 +29,6 @@ class CustomerCest
         Authorisation::setAuthorisationTokenCustomer($I);
         $I->sendDelete('/customer/orders/1?customer_id=10');
         $I->seeInDatabase('order', ['state' => 'canceled']);
+        $I->seeNumRecords(10,'ski', ['order_no' => null]);
     }
 }
