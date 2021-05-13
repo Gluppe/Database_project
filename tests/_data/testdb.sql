@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 13, 2021 at 02:16 PM
+-- Generation Time: May 13, 2021 at 03:11 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -29,8 +29,18 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `auth_token` (
   `token` varchar(100) NOT NULL,
-  `endpoint` enum('customer','employee','public') DEFAULT NULL
+  `endpoint` enum('customer','employee','public','shipper') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `auth_token`
+--
+
+INSERT INTO `auth_token` (`token`, `endpoint`) VALUES
+('0ee1345a-2a0c-497b-8c6e-4b25507fb931', 'shipper'),
+('4e114242-a7ee-42d0-9c4e-fe25e89a5321', 'employee'),
+('5b2c303a-43a9-4abf-a51a-b2d109527c7d', 'customer'),
+('8940207e-eca3-479f-8231-6c7ddf038a78', 'public');
 
 -- --------------------------------------------------------
 
@@ -282,6 +292,13 @@ CREATE TABLE `transition_history` (
   `state_change` varchar(50) NOT NULL,
   `datetime` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `transition_history`
+--
+
+INSERT INTO `transition_history` (`transition_history_id`, `order_number`, `state_change`, `datetime`) VALUES
+(0, 1, 'new -> open', '2021-05-13 14:18:16');
 
 -- --------------------------------------------------------
 
