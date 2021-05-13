@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 13, 2021 at 03:11 PM
+-- Generation Time: May 13, 2021 at 09:14 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -282,7 +282,7 @@ CREATE TABLE `transition_history` (
 --
 
 INSERT INTO `transition_history` (`transition_history_id`, `order_number`, `state_change`, `datetime`) VALUES
-(0, 428, 'shipped -> shipped', '2021-05-13 14:40:10');
+(1, 428, 'shipped -> shipped', '2021-05-13 14:40:10');
 
 -- --------------------------------------------------------
 
@@ -456,6 +456,12 @@ ALTER TABLE `ski`
 --
 ALTER TABLE `ski_type`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `transition_history`
+--
+ALTER TABLE `transition_history`
+  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `transporter`

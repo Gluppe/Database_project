@@ -66,6 +66,7 @@ class APIController
                 return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
+                // TODO: add printing to user whether order is added or not
                 $model->addOrder($payload, $queries);
                 return array(true);
         }
@@ -103,10 +104,8 @@ class APIController
                     $model = new OrdersModel();
                     $success = $model->updateOrder($uri, $payload);
                 }
-
                 if($success) {
-                    print("the order was successfully updated\n");
-
+                    print("The order was successfully updated\n");
                     $transitionModel->addTransitionHistory($uri[2], $payload['state']);
                     return array(true);
                 } else {
@@ -196,7 +195,13 @@ class APIController
                 return $model->getProductionPlan($uri[2]);
             case RESTConstants::METHOD_POST:
                 $model = new ProductionPlanModel();
-                return array($model->addProductionPlan($payload));
+                $success = $model->addProductionPlan($payload);
+                if($success) {
+                    print("Successfully added production plan");
+                    return array(true);
+                }
+                print("Could not add production plan");
+                return array(false);
         }
     }
 

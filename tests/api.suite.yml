@@ -10,7 +10,6 @@ modules:
           dsn: 'mysql:host=127.0.0.1;dbname=testdb'
           user: 'root'
           password: ''
-          dump: 'tests/_data/testdb.sql'
+          dump: tests/_data/testdb.sql
           populate: true
           cleanup: true
-          reconnect: true

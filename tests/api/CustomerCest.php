@@ -25,4 +25,10 @@ class CustomerCest
         $I->seeResponseContainsJson(array('order_number' => 1));
         $I->seeResponseContainsJson(array('order_number' => 428));
     }
+
+    public function testCancelOrder(ApiTester $I) {
+        Authorisation::setAuthorisationTokenCustomer($I);
+        $I->sendDelete('/customer/orders/1?customer_id=10');
+        $I->seeInDatabase('order', ['state' => 'canceled']);
+    }
 }
