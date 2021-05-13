@@ -92,15 +92,22 @@ class APIController
                 }
                 return array();
             case RESTConstants::METHOD_PATCH:
-                $model = new OrdersModel();
-                $success = $model->updateOrder($uri, $payload);
+                $success = false;
+                $endpoint = $uri[0];
+                $transitionModel = new TransitionHistoryModel();
+                $currentState = $transitionModel->getCurrentOrderState($uri[2]);
+                $currentState = $currentState[0]['state'];
+                if(($endpoint == RESTConstants::ENDPOINT_STOREKEEPER && $currentState == "skis-available") ||
+                    ($endpoint == RESTConstants::ENDPOINT_CUSTOMERREP && ($currentState == "new" || $currentState == "open")) ||
+                    ($endpoint == RESTConstants::ENDPOINT_SHIPPER && $currentState == "ready-for-shipping")) {
+                    $model = new OrdersModel();
+                    $success = $model->updateOrder($uri, $payload);
+                }
+
                 if($success) {
                     print("the order was successfully updated\n");
-                    $endpoint = $uri[0];
-                    if($endpoint == RESTConstants::ENDPOINT_SHIPPER || $endpoint == RESTConstants::ENDPOINT_STOREKEEPER || $endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
-                        $model = new TransitionHistoryModel();
-                        $model->addTransitionHistory($uri[2], $payload['state']);
-                    }
+
+                    $transitionModel->addTransitionHistory($uri[2], $payload['state']);
                     return array(true);
                 } else {
                     print("Something went wrong, the order was not updated\n");

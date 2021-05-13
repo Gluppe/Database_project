@@ -147,12 +147,12 @@ class MethodValidation {
             case RESTConstants::ENDPOINT_ORDERS:
                 if(empty($uri[2])) {
                     return match ($requestMethod) {
-                        RESTConstants::METHOD_GET, RESTConstants::METHOD_PATCH => true,
+                        RESTConstants::METHOD_GET => true,
                         default => false,
                     };
                 } else {
                     return match ($requestMethod) {
-                        RESTConstants::METHOD_GET => true,
+                        RESTConstants::METHOD_GET, RESTConstants::METHOD_PATCH => true,
                         default => false,
                     };
                 }
