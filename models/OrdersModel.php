@@ -225,19 +225,32 @@ WHERE o.order_number LIKE :order_number ';
 
     /**
      * Cancels the order of a customer.
-     * @param array $payload
+     * @param array $uri
+     * @param array $queries
      * @return bool
      */
-    public function cancelOrder(array $payload): bool {
+    public function cancelOrder(array $uri, array $queries): bool {
         $success = false;
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare(
                 'UPDATE `order` SET `state` = :state WHERE order_number like :order_number and customer_id like :customer_id');
             $stmt->bindValue(":state", "canceled");
-            $stmt->bindValue(":order_number", $payload["order_number"]);
-            $stmt->bindValue(":customer_id", $payload["customer_id"]);
+            $stmt->bindValue(":order_number", $uri[2]);
+            $stmt->bindValue(":customer_id", $queries["customer_id"]);
             $stmt->execute();
+
+            $stmt2 = $this->db->prepare('SELECT `production_number` FROM ski WHERE order_no LIKE :order_number');
+            $stmt2->bindValue(":order_number", $uri[2]);
+            $stmt2->execute();
+
+            while($row = $stmt2->fetch(PDO::FETCH_ASSOC)) {
+                $stmt3 = $this->db->prepare(
+                    'UPDATE `ski` SET `available` = 1, `order_no` = NULL WHERE production_number LIKE :production_number');
+                $stmt3->bindValue(":production_number", $row['production_number']);
+                $stmt3->execute();
+            }
+
             $this->db->commit();
             $success = true;
         }

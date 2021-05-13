@@ -108,7 +108,7 @@ class APIController
                 }
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
-                $success = $model->cancelOrder($uri[2]);
+                $success = $model->cancelOrder($uri, $queries);
                 if($success) {
                     print("the order was successfully deleted\n");
                     return array(true);
