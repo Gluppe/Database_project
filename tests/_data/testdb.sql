@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 09, 2021 at 11:40 PM
+-- Generation Time: May 13, 2021 at 02:16 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -150,6 +150,13 @@ CREATE TABLE `production_plan` (
   `month` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `production_plan`
+--
+
+INSERT INTO `production_plan` (`ID`, `month`) VALUES
+(1, '2021-05-01');
+
 -- --------------------------------------------------------
 
 --
@@ -161,6 +168,14 @@ CREATE TABLE `production_skis` (
   `daily_amount` int(11) NOT NULL,
   `production_plan_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `production_skis`
+--
+
+INSERT INTO `production_skis` (`ski_type_id`, `daily_amount`, `production_plan_id`) VALUES
+(1, 100, 1),
+(2, 50, 1);
 
 -- --------------------------------------------------------
 
@@ -421,7 +436,7 @@ ALTER TABLE `order`
 -- AUTO_INCREMENT for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `shipments`
