@@ -1,20 +1,13 @@
 <?php
 
 use Codeception\Test\Unit;
-require_once 'dbCredentials.php';
 require_once 'models/SkisModel.php';
-require_once 'models/OrdersModel.php';
 
-class PDOTest extends Unit {
+class SkisModelTest extends Unit {
     /**
      * @var UnitTester
      */
     protected $tester;
-
-    /**
-     * @var \PDODemo
-     */
-    protected $pdoDemo;
 
     protected function _before()
     {
@@ -29,16 +22,15 @@ class PDOTest extends Unit {
      * With a consistant test set this number will be correct as this is the first test run
      */
     public function testGetAllSkis() {
-        $SkisModel = new skisModel();
+        $SkisModel = new SkisModel();
 
-        $expectedCount = 23;
-        $this->assertCount($expectedCount, $SkisModel->getSkis());
+        $expectedCount = 10;
+        $this->tester->assertCount($expectedCount, $SkisModel->getSkis());
     }
 
     /**
      * A unit test for adding a new ski, make sure there are no skis of
      * ski_type_id 3 so the seeInDatabase wont find an already existing ski
-     * @todo Make sure the database cleans up after each test
     */
     public function testAddSkiByType() {
         $SkisModel = new skisModel();

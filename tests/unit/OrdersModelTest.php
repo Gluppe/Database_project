@@ -11,11 +11,6 @@ class OrdersModelTest extends Unit {
      */
     protected $tester;
 
-    /**
-     * @var \PDODemo
-     */
-    protected $pdoDemo;
-
     protected function _before()
     {
     }
@@ -24,36 +19,37 @@ class OrdersModelTest extends Unit {
     {
     }
 
+    /**
+     * Tests the getOrder function
+     */
     public function testGetOrderByOrderNumber() {
         $OrdersModel = new OrdersModel();
-        $res = $OrdersModel->getOrder(array('order_number' => 1));
+        $res = $OrdersModel->getOrder(array(2 => 1), array());
 
         $this->tester->assertIsArray($res);
 
-        $this->tester->assertEquals('1', $res[0]['production_number']);
-    }
-
-    public function testCancelOrderByOrderNumber() {
-        $OrdersModel = new OrdersModel();
-        $OrdersModel->cancelOrder(array('order_number' => 428, 'customer_id' => 10));
-        $res = $OrdersModel->getOrder(array('order_number' => 428, 'customer_id' => 10));
-
-        $this->tester->assertEquals('canceled', $res[0]['state']);
+        $this->tester->assertEquals('1', $res[0]['order_number']);
     }
 
     /**
-     * A test for updating the shipment number and state in an order
-     * It uses getOrder with the same order_number as the input and compares them
+     * Tests cancelOrder
      */
-    public function testUpdateOrderStateAndShipmentNumber() {
+    public function testCancelOrderByOrderNumber() {
         $OrdersModel = new OrdersModel();
-        $OrdersModel->updateOrder(array('order_number' => '1'), array('state' => 'ready to be shipped', 'shipment_number' => '200'));
-        $res = $OrdersModel->getOrder(array('order_number' => '1'));
-
-        $this->testerassertEquals('200', $res[0]['shipment_number']);
-        $this->testerassertEquals('ready to be shipped', $res[0]['state']);
+        $OrdersModel->cancelOrder(array(2 => 1), array('customer_id' => 10));
+        $this->tester->seeInDatabase('order', ['state' => 'canceled']);
+        $this->tester->seeNumRecords(10,'ski', ['order_no' => NULL]);
     }
 
+    /**
+     * A test for updating the state in an order
+     */
+    public function testUpdateOrderState() {
+        $OrdersModel = new OrdersModel();
+        $OrdersModel->updateOrder(array(2 => 1), array('state' => 'open'));
 
+        $this->tester->seeInDatabase('order', ['state' => 'open']);
+
+    }
 
 }
