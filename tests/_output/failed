@@ -1,5 +1,0 @@
-tests\unit\PDOTest.php:testGetAllSkis
-tests\unit\OrdersModelTest.php:testGetOrderByOrderNumber
-tests\unit\OrdersModelTest.php:testCancelOrderByOrderNumber
-tests\unit\OrdersModelTest.php:testUpdateOrderStateAndShipmentNumber
-tests\unit\TransitionHistoryModelTest.php:testTranstitionHistory

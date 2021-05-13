@@ -21,7 +21,7 @@ class TransitionHistoryModelTest extends Unit
 
     public function testAddTransitionHistory() {
         $transitionHistoryModel = new TransitionHistoryModel();
-        $transitionHistoryModel->addTransitionHistory(1, "open");
-        $this->tester->seeInDatabase('transition_history', ['state_change' => 'new -> open']);
+        $transitionHistoryModel->addTransitionHistory(1, "skis-available");
+        $this->tester->seeInDatabase('transition_history', ['state_change' => 'new -> skis-available']);
     }
 }

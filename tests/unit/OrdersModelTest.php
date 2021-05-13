@@ -49,7 +49,6 @@ class OrdersModelTest extends Unit {
         $OrdersModel->updateOrder(array(2 => 1), array('state' => 'open'));
 
         $this->tester->seeInDatabase('order', ['state' => 'open']);
-
     }
 
 }

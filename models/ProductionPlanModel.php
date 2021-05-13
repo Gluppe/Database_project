@@ -43,11 +43,9 @@ class ProductionPlanModel
                     $stmt2->execute();
                 }
                 $this->db->commit();
-                print("Successfully added production-plan with id: " . $lastId);
                 $success = true;
             } catch (Exception $e) {
                 $this->db->rollBack();
-                print("Could not add production-plan");
                 error_log($e);
             }
             return $success;

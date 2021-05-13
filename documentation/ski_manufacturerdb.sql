@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 11, 2021 at 12:44 PM
+-- Generation Time: May 13, 2021 at 09:14 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `testdb`
+-- Database: `ski_manufacturerdb`
 --
 
 -- --------------------------------------------------------
@@ -29,8 +29,17 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `auth_token` (
   `token` varchar(100) NOT NULL,
-  `endpoint` enum('customer','employee','public') DEFAULT NULL
+  `endpoint` enum('customer','employee','public','shipper') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `auth_token`
+--
+
+INSERT INTO `auth_token` (`token`, `endpoint`) VALUES
+('01523c5d-3ccd-464c-921e-8f12223be5e8', 'employee'),
+('1dec31f3-87d8-4a00-93b7-6961e1014a07', 'customer'),
+('4b27e7ec-a2b0-4462-8938-c111e59a1507', 'shipper');
 
 -- --------------------------------------------------------
 
@@ -114,8 +123,8 @@ CREATE TABLE `order` (
 --
 
 INSERT INTO `order` (`order_number`, `total_price`, `state`, `reference_to_larger_order`, `shipment_number`, `customer_id`, `date`) VALUES
-(1, 1000, 'new', NULL, 100, 10, '2021-04-07'),
-(428, 500, 'new', NULL, 100, 10, '2021-04-01');
+(1, 1000, 'ready-for-shipping', NULL, NULL, 10, '2021-04-07'),
+(428, 500, 'ready-for-shipping', NULL, NULL, 10, '2021-04-01');
 
 -- --------------------------------------------------------
 
@@ -267,6 +276,13 @@ CREATE TABLE `transition_history` (
   `state_change` varchar(50) NOT NULL,
   `datetime` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `transition_history`
+--
+
+INSERT INTO `transition_history` (`transition_history_id`, `order_number`, `state_change`, `datetime`) VALUES
+(1, 428, 'shipped -> shipped', '2021-05-13 14:40:10');
 
 -- --------------------------------------------------------
 
@@ -440,6 +456,12 @@ ALTER TABLE `ski`
 --
 ALTER TABLE `ski_type`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `transition_history`
+--
+ALTER TABLE `transition_history`
+  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `transporter`
