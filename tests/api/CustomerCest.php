@@ -1,5 +1,9 @@
 <?php
+
+use Codeception\Util\HttpCode;
+
 require_once "Authorisation.php";
+
 class CustomerCest
 {
     public function _before(ApiTester $I)
@@ -8,8 +12,9 @@ class CustomerCest
 
     public function getAllOrdersByCustomerIdCustomerEndpoint(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
+        $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendGet('/customer/orders?customer_id=10');
-        $I->seeResponseCodeIs(\Codeception\Util\HttpCode::OK);
+        $I->seeResponseCodeIs(HttpCode::OK);
         $I->seeResponseIsJson();
         $I->seeResponseMatchesJsonType([
             'order_number' => 'string',
@@ -27,18 +32,22 @@ class CustomerCest
 
     public function testAddOrder(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
+        $I->haveHttpHeader('Content-Type', 'application/json');
         $data = array('skis' => array('1' => 100, '2' => 50));
         $data = json_encode($data);
         $I->sendPost('/customer/orders?customer_id=10', $data);
-        $I->seeResponseCodeIs(\Codeception\Util\HttpCode::CREATED);
+        $I->seeResponseIsJson();
+        $I->seeResponseCodeIs(HttpCode::CREATED);
         $I->seeNumRecords(3, 'order', []);
         $I->seeNumRecords(2, 'order_skis', ['order_number' => '429']);
     }
 
     public function testCancelOrder(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
+        $I->haveHttpHeader('Content-Type', 'application/json');
         $I->sendDelete('/customer/orders/1?customer_id=10');
-        $I->seeResponseCodeIs(\Codeception\Util\HttpCode::ACCEPTED);
+        $I->seeResponseIsJson();
+        $I->seeResponseCodeIs(HttpCode::ACCEPTED);
         $I->seeInDatabase('order', ['state' => 'canceled']);
         $I->seeNumRecords(10,'ski', ['order_no' => null]);
     }
