@@ -82,12 +82,15 @@ try {
                 http_response_code(RESTConstants::HTTP_OK);
                 print(json_encode($res));
                 break;
-            case RESTConstants::METHOD_PUT:
-            case RESTConstants::METHOD_DELETE:
-            case RESTConstants::METHOD_POST:
-                http_response_code(RESTConstants::HTTP_OK);
+            case RESTConstants::METHOD_PATCH:
+                http_response_code(RESTConstants::HTTP_UPDATED);
                 break;
-
+            case RESTConstants::METHOD_DELETE:
+                http_response_code(RESTConstants::HTTP_ACCEPTED);
+                break;
+            case RESTConstants::METHOD_POST:
+                http_response_code(RESTConstants::HTTP_CREATED);
+                break;
         }
     }
 

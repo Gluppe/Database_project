@@ -25,6 +25,13 @@ class CustomerCest
         $I->seeResponseContainsJson(array('order_number' => 428));
     }
 
+    public function testAddOrder(ApiTester $I) {
+        Authorisation::setAuthorisationTokenCustomer($I);
+        $data = array('skis' => array('1' => 100, '2' => 50));
+        $I->sendPost('/customer/orders?customer_id=10', $data);
+        $I->seeNumRecords(3, 'order', ['state' => 'new']);
+    }
+
     public function testCancelOrder(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
         $I->sendDelete('/customer/orders/1?customer_id=10');
