@@ -43,7 +43,7 @@ class PayloadValidation
             return false;
         }
         return match ($uri[0]) {
-            RESTConstants::ENDPOINT_SHIPPER, RESTConstants::ENDPOINT_CUSTOMERREP => $this->isValidUpdateOrderPayload($uri, $payload),
+            RESTConstants::ENDPOINT_SHIPPER, RESTConstants::ENDPOINT_CUSTOMERREP, RESTConstants::ENDPOINT_STOREKEEPER => $this->isValidUpdateOrderPayload($uri, $payload),
             default => false,
         };
     }
@@ -130,8 +130,16 @@ class PayloadValidation
     {
         switch($uri[1]) {
             case RESTConstants::ENDPOINT_ORDERS:
-                if(!empty($payload['state']) && is_string($payload['state'])) {
-                    return true;
+                $state = strtolower($payload['state']);
+                if(!empty($state) && is_string($state)) {
+                    $endpoint = $uri[0];
+                    if( ($state == "new" && $endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) ||
+                        ($state == "open" && $endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) ||
+                        ($state == "skis-available" && $endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) ||
+                        ($state == "ready-for-shipping" && $endpoint == RESTConstants::ENDPOINT_STOREKEEPER) ||
+                        ($state == "shipped" && $endpoint == RESTConstants::ENDPOINT_SHIPPER)) {
+                        return true;
+                    }
                 }
                 return false;
             default:
