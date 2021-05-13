@@ -14,6 +14,7 @@ class PayloadValidation
         return match ($requestMethod) {
             RESTConstants::METHOD_PUT, RESTConstants::METHOD_DELETE, RESTConstants::METHOD_GET => true,
             RESTConstants::METHOD_POST => $this->isValidPostPayload($uri, $payload),
+            RESTConstants::METHOD_PATCH => $this->isValidPatchPayload($uri, $payload),
             default => false,
         };
     }
@@ -32,6 +33,17 @@ class PayloadValidation
             RESTConstants::ENDPOINT_CUSTOMER => $this->isValidCustomerPayload($uri, $payload),
             RESTConstants::ENDPOINT_STOREKEEPER => $this->isValidStorekeeperPayload($uri, $payload),
             RESTConstants::ENDPOINT_PLANNER => $this->isValidPlannerPayload($uri, $payload),
+            default => false,
+        };
+    }
+
+    public function isValidPatchPayload(array $uri, array $payload): bool
+    {
+        if(empty($payload)) {
+            return false;
+        }
+        return match ($uri[0]) {
+            RESTConstants::ENDPOINT_SHIPPER, RESTConstants::ENDPOINT_CUSTOMERREP => $this->isValidUpdateOrderPayload($uri, $payload),
             default => false,
         };
     }
@@ -113,5 +125,19 @@ class PayloadValidation
                 return true;
         }
     }
+
+    public function isValidUpdateOrderPayload(array $uri, array $payload): bool
+    {
+        switch($uri[1]) {
+            case RESTConstants::ENDPOINT_ORDERS:
+                if(!empty($payload['state']) && is_string($payload['state'])) {
+                    return true;
+                }
+                return false;
+            default:
+                return false;
+        }
+    }
+
 }
 

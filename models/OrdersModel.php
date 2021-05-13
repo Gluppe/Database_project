@@ -187,11 +187,10 @@ WHERE o.order_number LIKE :order_number ';
     }
 
 
-
-
     /**
      * Method will update the order that matches the orderNumber parameter with the new values provided by the other parameters.
-     * @param array $payload    Array payload:
+     * @param array $uri
+     * @param array $payload Array payload:
      *                          Index 0: Order number.
      *                          Index 1: Total price.
      *                          Index 2: State
@@ -199,19 +198,20 @@ WHERE o.order_number LIKE :order_number ';
      *                          Index 4: Shipment number.
      * @return bool
      */
-    public function updateOrder(array $payload): bool {
+    public function updateOrder(array $uri, array $payload): bool {
         $success = false;
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare(
-                'UPDATE `order` SET total_price = :total_price, `state` = :state, 
-                   reference_to_larger_order = :reference_to_larger_order, shipment_number = :shipment_number, 
-                   customer_id = :customer_id WHERE order_number like :order_number');
-            $stmt->bindValue(":order_number", $payload[0]);
-            $stmt->bindValue(":total_price", $payload[1]);
-            $stmt->bindValue(":state", $payload[2]);
-            $stmt->bindValue(":reference_to_larger_order", $payload[3]);
-            $stmt->bindValue(":shipment_number", $payload[4]);
+                'UPDATE `order` SET `state` = :state, 
+                shipment_number = :shipment_number WHERE order_number like :order_number');
+            $stmt->bindValue(":order_number", $uri[2]);
+            $stmt->bindValue(":state", $payload['state']);
+            if(!empty($payload['shipment_number']) && $uri[0] == RESTConstants::ENDPOINT_SHIPPER) {
+                $stmt->bindValue(":shipment_number", $payload['shipment_number']);
+            } else {
+                $stmt->bindValue(":shipment_number", null);
+            }
             $stmt->execute();
             $this->db->commit();
             $success = true;
