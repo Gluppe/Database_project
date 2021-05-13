@@ -22,6 +22,7 @@ class CustomerCest
             'skiType_quantity' => 'array',
         ]);
         $I->assertEquals(2, count(json_decode($I->grabResponse())));
-        $I->seeResponseContainsJson(array('order_number' => 1, 'order_number' => 428));
+        $I->seeResponseContainsJson(array('order_number' => 1));
+        $I->seeResponseContainsJson(array('order_number' => 428));
     }
 }
