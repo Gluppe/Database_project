@@ -22,7 +22,6 @@ class APIController
         switch ($endpointUri) {
             case RESTConstants::ENDPOINT_ORDERS:
                 if($uri[0] == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                    print("A customer_id query is needed");
                     return array();
                 } else if(empty($uri[2])) {
                     return $this->handleOrdersRequest($uri, $requestMethod, $queries, $payload);
@@ -54,7 +53,6 @@ class APIController
                 $model = new OrdersModel();
                 $endpoint = $uri[0];
                 if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                    print("A customer_id query is needed to see your orders");
                     return array(false);
                 } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
                     return $model->getOrder($uri, $queries);
@@ -66,7 +64,7 @@ class APIController
                 return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
-                // TODO: add printing to user whether order is added or not
+                // TODO: add printing to user whether order is added, also print order ID
                 $model->addOrder($payload, $queries);
                 return array(true);
         }
@@ -86,7 +84,6 @@ class APIController
                 $model = new OrdersModel();
                 $endpoint = $uri[0];
                 if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
-                    print("A customer_id query is needed to see your orders");
                     return array(false);
                 } else if ($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['status']) && empty($queries['since'])) {
                     return $model->getOrder($uri, $queries);
@@ -105,21 +102,17 @@ class APIController
                     $success = $model->updateOrder($uri, $payload);
                 }
                 if($success) {
-                    print("The order was successfully updated\n");
                     $transitionModel->addTransitionHistory($uri[2], $payload['state']);
                     return array(true);
                 } else {
-                    print("Something went wrong, the order was not updated\n");
                     return array(false);
                 }
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
                 $success = $model->cancelOrder($uri, $queries);
                 if($success) {
-                    print("the order was successfully deleted\n");
                     return array(true);
                 } else {
-                    print("Something went wrong, the order was not deleted\n");
                     return array(false);
                 }
         }
@@ -151,10 +144,8 @@ class APIController
                 $model = new SkisModel();
                 $success = $model->addSki($payload);
                 if ($success) {
-                    print("Ski successfully added\n");
                     return array(true);
                 } else {
-                    print("Something went wrong, ski not added\n");
                     return array(false);
                 }
         }
@@ -197,10 +188,8 @@ class APIController
                 $model = new ProductionPlanModel();
                 $success = $model->addProductionPlan($payload);
                 if($success) {
-                    print("Successfully added production plan");
                     return array(true);
                 }
-                print("Could not add production plan");
                 return array(false);
         }
     }
