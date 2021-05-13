@@ -28,8 +28,10 @@ class CustomerCest
     public function testAddOrder(ApiTester $I) {
         Authorisation::setAuthorisationTokenCustomer($I);
         $data = array('skis' => array('1' => 100, '2' => 50));
+        $data = json_encode($data);
         $I->sendPost('/customer/orders?customer_id=10', $data);
-        $I->seeNumRecords(3, 'order', ['state' => 'new']);
+        $I->seeNumRecords(3, 'order', []);
+        $I->seeNumRecords(2, 'order_skis', ['order_number' => '429']);
     }
 
     public function testCancelOrder(ApiTester $I) {
