@@ -19,14 +19,14 @@ class TransitionHistoryModel {
     public function addTransitionHistory(int $orderNumber, String $state) {
         try {
             $this->db->beginTransaction();
-            $query1 = 'INSERT INTO transition_history(state_change) VALUES (:state_change)';
+            $query = 'INSERT INTO transition_history(state_change, order_number) VALUES (:state_change, :order_number)';
 
             $previousState = $this->getCurrentOrderState($orderNumber);
-
-            $stmt = $this->db->prepare($query1);
-            $stmt->bindValue("state_change", $previousState . " -> " . $state);
-            $stmt->bindValue("order_number", $orderNumber);
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(":state_change", $previousState[0]['state'] . " -> " . $state);
+            $stmt->bindValue(":order_number", $orderNumber);
             $stmt->execute();
+            $this->db->commit();
         } catch (Exception $e){
             $this->db->rollBack();
             error_log($e);
@@ -36,14 +36,15 @@ class TransitionHistoryModel {
     /**
      * Finds the current state of an order
      * @param int $orderNumber Number of the order
-     * @return array An array wher Index 0 = the state of the order
+     * @return array An array where Index 0 = the state of the order
      */
     public function getCurrentOrderState(int $orderNumber): array {
         $res = array();
 
         $query = 'SELECT `state` FROM `order` WHERE order_number = :order_number';
         $stmt = $this->db->prepare($query);
-        $stmt->bindValue("order_number", $orderNumber);
+        $stmt->bindValue(":order_number", $orderNumber);
+        $stmt->execute();
 
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $res[] = $row;

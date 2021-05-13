@@ -69,7 +69,7 @@ class MethodValidation {
                 };
             } else {
                 return match ($requestMethod) {
-                    RESTConstants::METHOD_POST => true,
+                    RESTConstants::METHOD_PATCH => true,
                     default => false,
                 };
             }

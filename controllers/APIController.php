@@ -5,6 +5,7 @@ require_once 'models/SkisModel.php';
 require_once 'models/ShipmentsModel.php';
 require_once 'models/ProductionPlanModel.php';
 require_once 'models/AuthorisationModel.php';
+require_once 'models/TransitionHistoryModel.php';
 require_once 'controllers/APIException.php';
 
 class APIController
@@ -59,6 +60,8 @@ class APIController
                     return $model->getOrder($uri, $queries);
                 } else if($endpoint == RESTConstants::ENDPOINT_CUSTOMER) {
                     return $model->getOrdersByCustomerId($queries);
+                } else if($endpoint == RESTConstants::ENDPOINT_SHIPPER) {
+                    return $model->getOrder($uri, array("state" => "ready-for-shipping"));
                 }
                 return array(false);
             case RESTConstants::METHOD_POST:
@@ -94,7 +97,7 @@ class APIController
                 if($success) {
                     print("the order was successfully updated\n");
                     $endpoint = $uri[0];
-                    if($endpoint == RESTConstants::ENDPOINT_SHIPPER || $endpoint == RESTConstants::ENDPOINT_STOREKEEPER) {
+                    if($endpoint == RESTConstants::ENDPOINT_SHIPPER || $endpoint == RESTConstants::ENDPOINT_STOREKEEPER || $endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
                         $model = new TransitionHistoryModel();
                         $model->addTransitionHistory($uri[2], $payload['state']);
                     }
@@ -105,7 +108,7 @@ class APIController
                 }
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
-                $success = $model->cancelOrder($uri[2]);
+                $success = $model->cancelOrder($uri, $queries);
                 if($success) {
                     print("the order was successfully deleted\n");
                     return array(true);
@@ -165,15 +168,6 @@ class APIController
             case RESTConstants::METHOD_GET:
                 $model = new ShipmentsModel();
                 return $model->getShipment($queries);
-            case RESTConstants::METHOD_POST:
-                //TODO: updateShipment may not be necessary
-                if(!empty($uri[2])) {
-                    $model = new ShipmentsModel();
-                    return $model->updateShipment($payload);
-                } else {
-                    print("Shipment number must be specifed");
-                }
-                return array(true);
         }
         return array();
     }
