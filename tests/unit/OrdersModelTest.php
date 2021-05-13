@@ -11,7 +11,6 @@ class OrdersModelTest extends Unit {
      */
     protected $tester;
 
-
     protected function _before()
     {
     }

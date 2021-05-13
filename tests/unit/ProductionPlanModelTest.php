@@ -10,10 +10,6 @@ class ProductionPlanModelTest extends Unit
      */
     protected $tester;
 
-    /**
-     * @var \PDODemo
-     */
-    protected $pdoDemo;
 
     protected function _before()
     {

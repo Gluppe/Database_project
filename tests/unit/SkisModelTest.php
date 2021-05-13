@@ -9,11 +9,6 @@ class SkisModelTest extends Unit {
      */
     protected $tester;
 
-    /**
-     * @var \PDODemo
-     */
-    protected $pdoDemo;
-
     protected function _before()
     {
     }
@@ -36,7 +31,6 @@ class SkisModelTest extends Unit {
     /**
      * A unit test for adding a new ski, make sure there are no skis of
      * ski_type_id 3 so the seeInDatabase wont find an already existing ski
-     * @todo Make sure the database cleans up after each test
     */
     public function testAddSkiByType() {
         $SkisModel = new skisModel();
