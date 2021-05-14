@@ -111,6 +111,14 @@ localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
 Example request: `localhost:8080/customer/orders/10?customer_id=5`
 
 ##### Split an order:
+```
+Method: POST
+localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
+```
+`{:order_number}` is a mandatory parameter
+`{?customer_id={:id}}` is a mandatory query
+
+Example request: `localhost:8080/customer/orders/1?customer_id=10`
 
 TODO: make this
 
