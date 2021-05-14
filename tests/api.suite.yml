@@ -4,11 +4,11 @@ modules:
       - Asserts
       - \Helper\Api
       - REST:
-          url: http://localhost:8181/
+          url: http://localhost:8080/
           depends: PhpBrowser
       - Db:
           dsn: 'mysql:host=127.0.0.1;dbname=testdb'
-          user: 'root'
+          user: ''
           password: ''
           dump: tests/_data/testdb.sql
           populate: true

@@ -2,11 +2,19 @@
 
 ## Running the Web server
 
-First make a file called `dbCredentials.php`, the template for this file is called `dbCredentialsTemplate.php`.
+First make a file called `dbCredentials.php`, the template for this file is called 
+`dbCredentialsTemplate.php`.
 
-When the dbCredentials file is made with the correct information, run the setup script called `Setup.php`.
+When the dbCredentials file is made with the correct information, 
+run the setup script called `Setup.php`.
 
 To start the web server, use the command: `php -S localhost:8080 api.php`.
+
+## Tests
+When running the tests, you should create a new test database, simply change DB_NAME in dbCredentials.php 
+to `testdb` and run the Setup script again. You also need to change the `unit.suite.yml` and `api.suite.yml` 
+files to fit your setup. Then you can run the tests. If you wish to run the api tests,
+the application needs to be running.
 
 ## Endpoints
 
