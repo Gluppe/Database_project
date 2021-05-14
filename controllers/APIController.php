@@ -102,7 +102,7 @@ class APIController
                     $success = $model->updateOrder($uri, $payload);
                 }
                 if($success) {
-                    $transitionModel->addTransitionHistory($uri[2], $payload['state']);
+                    $transitionModel->addTransitionHistory($uri[2], $payload['state'], $currentState);
                     return array(true);
                 } else {
                     return array(false);

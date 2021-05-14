@@ -16,14 +16,14 @@ class TransitionHistoryModel {
      * @param int $orderNumber The order number of the order changing state
      * @param string $state The new state of the order
      */
-    public function addTransitionHistory(int $orderNumber, String $state) {
+    public function addTransitionHistory(int $orderNumber, string $newState, string $oldState) {
         try {
             $this->db->beginTransaction();
             $query = 'INSERT INTO transition_history(state_change, order_number) VALUES (:state_change, :order_number)';
 
             $previousState = $this->getCurrentOrderState($orderNumber);
             $stmt = $this->db->prepare($query);
-            $stmt->bindValue(":state_change", $previousState[0]['state'] . " -> " . $state);
+            $stmt->bindValue(":state_change", $oldState . " -> " . $newState);
             $stmt->bindValue(":order_number", $orderNumber);
             $stmt->execute();
             $this->db->commit();

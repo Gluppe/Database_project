@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 13, 2021 at 09:20 PM
+-- Generation Time: May 14, 2021 at 12:35 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -208,7 +208,8 @@ CREATE TABLE `shipments` (
 --
 
 INSERT INTO `shipments` (`shipment_number`, `store_name`, `shipping_address`, `scheduled_pickup_date`, `status`, `driver_id`, `transporter_company_id`) VALUES
-(100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500);
+(100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500),
+(102, 'nice store', 'address example', '2021-05-18', 'waiting', 5, 500);
 
 -- --------------------------------------------------------
 
@@ -299,7 +300,10 @@ CREATE TABLE `transition_history` (
 
 INSERT INTO `transition_history` (`transition_history_id`, `order_number`, `state_change`, `datetime`) VALUES
 (1, 1, 'new -> open', '2021-05-13 14:18:16'),
-(2, 1, 'new -> skis-available', '2021-05-13 21:19:08');
+(2, 1, 'new -> skis-available', '2021-05-13 21:19:08'),
+(3, 1, 'new -> skis-available', '2021-05-13 23:07:47'),
+(4, 1, 'shipped -> shipped', '2021-05-14 12:27:01'),
+(5, 1, 'shipped -> shipped', '2021-05-14 12:28:40');
 
 -- --------------------------------------------------------
 
@@ -390,7 +394,6 @@ ALTER TABLE `production_skis`
 --
 ALTER TABLE `shipments`
   ADD PRIMARY KEY (`shipment_number`),
-  ADD UNIQUE KEY `driver_id` (`driver_id`,`transporter_company_id`),
   ADD UNIQUE KEY `shipment_number` (`shipment_number`),
   ADD KEY `transporter_company_id` (`transporter_company_id`);
 
@@ -460,7 +463,7 @@ ALTER TABLE `production_plan`
 -- AUTO_INCREMENT for table `shipments`
 --
 ALTER TABLE `shipments`
-  MODIFY `shipment_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `shipment_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `ski`
@@ -478,7 +481,7 @@ ALTER TABLE `ski_type`
 -- AUTO_INCREMENT for table `transition_history`
 --
 ALTER TABLE `transition_history`
-  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `transporter`

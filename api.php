@@ -77,7 +77,6 @@ try{
 }
 try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
-
     if (count($res) == 0) {
         $response["status code"] = RESTConstants::HTTP_NOT_FOUND;
         $response["message"] = "No response";
@@ -95,8 +94,8 @@ try {
                 print(json_encode($res));
                 break;
             case RESTConstants::METHOD_PATCH:
-                http_response_code(RESTConstants::HTTP_UPDATED);
-                $response["status code"] = RESTConstants::HTTP_UPDATED;
+                http_response_code(RESTConstants::HTTP_OK);
+                $response["status code"] = RESTConstants::HTTP_OK;
                 $response["message"] = "Successfully updated";
                 print(json_encode($response));
                 break;
@@ -116,5 +115,8 @@ try {
     }
 } catch (Exception $e) {
     http_response_code(RESTConstants::HTTP_INTERNAL_SERVER_ERROR);
+    $response["status code"] = RESTConstants::HTTP_INTERNAL_SERVER_ERROR;
+    $response["message"] = "Internal Server error has occured";
+    print(json_encode($response));
     return;
 }

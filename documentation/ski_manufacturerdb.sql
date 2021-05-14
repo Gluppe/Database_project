@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 13, 2021 at 09:14 PM
+-- Generation Time: May 14, 2021 at 12:34 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -373,7 +373,6 @@ ALTER TABLE `production_skis`
 --
 ALTER TABLE `shipments`
   ADD PRIMARY KEY (`shipment_number`),
-  ADD UNIQUE KEY `driver_id` (`driver_id`,`transporter_company_id`),
   ADD UNIQUE KEY `shipment_number` (`shipment_number`),
   ADD KEY `transporter_company_id` (`transporter_company_id`);
 
