@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 14, 2021 at 12:35 PM
+-- Generation Time: May 15, 2021 at 12:00 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -60,8 +60,8 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`ID`, `name`, `start_date`, `end_date`) VALUES
-(10, 'Stian', '2021-03-21', NULL),
-(11, 'Stian', '2021-03-21', NULL);
+(10, 'customer1', '2021-03-21', NULL),
+(11, 'customer2', '2021-03-21', NULL);
 
 -- --------------------------------------------------------
 
@@ -124,8 +124,8 @@ CREATE TABLE `order` (
 --
 
 INSERT INTO `order` (`order_number`, `total_price`, `state`, `reference_to_larger_order`, `shipment_number`, `customer_id`, `date`) VALUES
-(1, 1000, 'new', NULL, 100, 10, '2021-04-07'),
-(428, 500, 'new', NULL, 100, 10, '2021-04-01');
+(1, 3100, 'new', NULL, 100, 10, '2021-04-07'),
+(428, 1300, 'new', NULL, 100, 10, '2021-04-01');
 
 -- --------------------------------------------------------
 
@@ -265,8 +265,8 @@ CREATE TABLE `ski_type` (
 --
 
 INSERT INTO `ski_type` (`ID`, `model`, `type`, `temperature`, `grip_system`, `size`, `weight_class`, `description`, `discontinued`, `url`, `MSRP`) VALUES
-(1, 'Super ski 3000', 'Classic', 'warm', 'super grip', 142, '80-90', 'This is a classic ski', 0, '', 1000),
-(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'This is a ski', 0, '', 500);
+(1, 'Active Pro', 'Classic', 'warm', 'super grip', 142, '80-90', 'This is a classic ski', 0, '', 100),
+(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'This is a ski', 0, '', 80);
 
 -- --------------------------------------------------------
 
@@ -321,7 +321,7 @@ CREATE TABLE `transporter` (
 --
 
 INSERT INTO `transporter` (`company_id`, `company_name`) VALUES
-(500, 'Stian shipping inc');
+(500, 'Shippinc company name');
 
 --
 -- Indexes for dumped tables
