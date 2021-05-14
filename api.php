@@ -77,7 +77,6 @@ try{
 }
 try {
     $res = $controller->handleRequest($uri, $requestMethod, $queries, $payload);
-
     if (count($res) == 0) {
         $response["status code"] = RESTConstants::HTTP_NOT_FOUND;
         $response["message"] = "No response";

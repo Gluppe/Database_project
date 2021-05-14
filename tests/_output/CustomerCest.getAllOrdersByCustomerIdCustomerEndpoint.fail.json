@@ -1,0 +1,38 @@
+Array
+(
+    [0] => Array
+        (
+            [order_number] => 1
+            [total_price] => 1000
+            [state] => new
+            [reference_to_larger_order] => 
+            [shipment_number] => 100
+            [customer_id] => 10
+            [date] => 2021-04-07
+            [skiType_quantity] => Array
+                (
+                    [1] => 15
+                    [2] => 20
+                )
+
+        )
+
+    [1] => Array
+        (
+            [order_number] => 428
+            [total_price] => 500
+            [state] => new
+            [reference_to_larger_order] => 
+            [shipment_number] => 100
+            [customer_id] => 10
+            [date] => 2021-04-01
+            [skiType_quantity] => Array
+                (
+                    [1] => 5
+                    [2] => 10
+                )
+
+        )
+
+)
+[{"order_number":"1","total_price":"1000","state":"new","reference_to_larger_order":null,"shipment_number":"100","customer_id":"10","date":"2021-04-07","skiType_quantity":{"1":"15","2":"20"}},{"order_number":"428","total_price":"500","state":"new","reference_to_larger_order":null,"shipment_number":"100","customer_id":"10","date":"2021-04-01","skiType_quantity":{"1":"5","2":"10"}}]
