@@ -1,1 +1,10 @@
-Added order with id: 429{"status code":201,"message":"Successfully created"}
+Array
+(
+    [skis] => Array
+        (
+            [1] => 100
+            [2] => 50
+        )
+
+)
+{"status code":201,"message":"Successfully created"}

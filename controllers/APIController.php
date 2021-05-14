@@ -65,8 +65,10 @@ class APIController
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 // TODO: add printing to user whether order is added, also print order ID
-                $model->addOrder($payload, $queries);
-                return array(true);
+                if($model->addOrder($payload, $queries)) {
+                    return array(true);
+                }
+                return array(false);
         }
         return array();
     }
@@ -107,6 +109,13 @@ class APIController
                 } else {
                     return array(false);
                 }
+            case RESTConstants::METHOD_POST:
+                $model = new OrdersModel();
+                $res = $model->splitOrder($uri, $queries);
+                if($res) {
+                    return array(true);
+                }
+                return array(false);
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
                 $success = $model->cancelOrder($uri, $queries);

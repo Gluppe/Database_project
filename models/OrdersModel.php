@@ -132,12 +132,16 @@ class OrdersModel {
      *  opprett nytt ordrenummer på dette antallet.
      */
 
-    public function splitOrder(array $query)
+    public function splitOrder(array $uri, array $query): bool
     {
         $countedSkis = 0;
         $skis = array();
+        $success = false;
+        if(!$this->orderNumberCustomerIdMatch($uri[2], $query['customer_id'])) {
+            return false;
+        }
         try {
-            $oldSkis = $this->getOrderedSkis($query);
+            $oldSkis = $this->getOrderedSkis($uri);
             $this->db->beginTransaction();
             $newSkis = array();
             $stmt = $this->db->prepare(
@@ -148,7 +152,7 @@ class OrdersModel {
                         ");
             foreach ($oldSkis as $id => $oldQuantity){
                 $stmt->bindValue(":stid", $id);
-                $stmt->bindValue(":order_no", $query["order_number"]);
+                $stmt->bindValue(":order_no", $uri[2]);
                 $stmt->execute();
                 $readySkis = $stmt->fetch(PDO::FETCH_ASSOC);
                 $countedSkis += $readySkis["count(order_no)"];
@@ -159,28 +163,31 @@ class OrdersModel {
             }
             $skis = ["newSkis" => $newSkis, "oldSkis" => $oldSkis];
             $this->db->commit();
+
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log($e);
         }
         if ($countedSkis != 0) {
-            if ($this->updateOrDeleteOrder_skis($query, $skis)) {
-                $uri = array( "", "" , $query["order_number"]);
-                $payload = array("state"=>"ready", "shipment_number"=>"");
+            if ($this->updateOrDeleteOrder_skis($uri, $skis)) {
+                $uri = array( "", "" , $uri[2]);
+                $payload = array("state"=>"ready-for-shipping", "shipment_number"=>"");
                 if($this->updateOrder($uri, $payload)){
                     $this->addOrder(["skis" => $skis["newSkis"]], $query);
+                    $success = true;
                 }
             }
         }else {
             print_r("No split executed cause no skis were counted.");
         }
+        return $success;
     }
 
-    private function getOrderedSkis(array $query):array{
+    private function getOrderedSkis(array $uri): array {
         $stmt = $this->db->prepare(
             'select * from order_skis
                     where order_skis.order_number = :orderNumber');
-        $stmt->bindValue(":orderNumber", $query["order_number"]);
+        $stmt->bindValue(":orderNumber", $uri[2]);
         $stmt->execute();
         $skis = array();
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -189,15 +196,15 @@ class OrdersModel {
         return $skis;
     }
 
-    private function updateOrDeleteOrder_skis(array $query, array $payload): bool {
+    private function updateOrDeleteOrder_skis(array $uri, array $payload): bool {
         try {
             $this->db->beginTransaction();
             foreach ($payload["newSkis"] as $id => $splitQuantity) {
                 $newQuantity = $payload["oldSkis"][$id] - $splitQuantity;
                 if ($payload["oldSkis"][$id] == $splitQuantity){
-                    $this->deleteFromOrder_skis($id, $query["order_number"]);
+                    $this->deleteFromOrder_skis($id, $uri[2]);
                 }else{
-                    $this->updateOrder_skis($newQuantity, $id, $query["order_number"]);
+                    $this->updateOrder_skis($newQuantity, $id, $uri[2]);
                 }
             }
             return $this->db->commit();
@@ -240,8 +247,8 @@ AND ski_type_id = :skitype');
      */
     public function updateOrder(array $uri, array $payload): bool {
         try {
-            print_r($uri);
-            print_r($payload);
+            //print_r($uri);
+            //print_r($payload);
             $this->db->beginTransaction();
             $stmt = $this->db->prepare('
 UPDATE `order` 
@@ -255,12 +262,12 @@ WHERE order_number = :order_number');
             } else {
                 $stmt->bindValue(":shipment_number", null);
             }
-            $getSkis = array( "skis"=> $this->getOrderedSkis(["order_number"=>$uri[2]]));
-            print_r("Getskis: \n");
-            print_r($getSkis);
+            $getSkis = array( "skis" => $this->getOrderedSkis($uri));
+            //print_r("Getskis: \n");
+            //print_r($getSkis);
             $totalPrice = $this->getTotalPrice($getSkis);
-            print_r("total price: \n");
-            print_r($totalPrice);
+            //print_r("total price: \n");
+            //print_r($totalPrice);
             $stmt->bindValue(":total_price", $totalPrice);
             $stmt->execute();
             return $this->db->commit();
@@ -323,7 +330,6 @@ WHERE production_number = :production_number');
     private function getTotalPrice(array $orderedSkis): int {
         $total_price = 0;
         try {
-            print_r($orderedSkis);
             foreach ($orderedSkis["skis"] as $id => $id_value) {
                 $stmt = $this->db->prepare("
                                     select MSRP 
@@ -355,7 +361,8 @@ WHERE production_number = :production_number');
      *           )
      *       )
      */
-    public function addOrder(array $orderedSkis, array $queries): void {
+    public function addOrder(array $orderedSkis, array $queries): bool {
+        $success = false;
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare(
@@ -377,10 +384,20 @@ WHERE production_number = :production_number');
                 $stmt2->execute();
             }
             $this->db->commit();
-            print("Added order with id: " . $lastOrder);
+            $success = true;
         } catch (Exception $e){
             $this->db->rollBack();
             error_log($e);
         }
+        return $success;
+    }
+
+    public function orderNumberCustomerIdMatch(string $orderNumber, string $customer_id): bool {
+        $stmt = $this->db->prepare('SELECT customer_id FROM `order` WHERE order_number LIKE :order_number');
+        $stmt->bindValue(':order_number', $orderNumber);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        $customer_id_res = $res['customer_id'];
+        return $customer_id_res == $customer_id;
     }
 }
