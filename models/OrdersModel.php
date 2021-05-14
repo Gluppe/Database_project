@@ -60,7 +60,7 @@ class OrdersModel {
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $currentOrderNumber = $row["order_number"];
 
-                $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
+                $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number = :current_ON");
                 $stmt2->bindValue(":current_ON", $currentOrderNumber);
                 $stmt2->execute();
                 $orderSkisRow = array();
@@ -85,7 +85,7 @@ class OrdersModel {
         $result = array();
         $statement = "
             SELECT * FROM `order` 
-            WHERE customer_id LIKE :customer_id";
+            WHERE customer_id = :customer_id";
         if(!empty($queries['since'])) {
             $statement = $statement . " AND date >= :date";
         }
@@ -101,13 +101,13 @@ class OrdersModel {
             while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 $currentOrderNumber = $row["order_number"];
 
-                $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
+                $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number = :current_ON");
                 $stmt2->bindValue(":current_ON", $currentOrderNumber);
                 $stmt2->execute();
                 $orderSkisRow = array();
                 while ($row2 = $stmt2->fetch(PDO::FETCH_ASSOC)) {
                     $orderSkisRow[$row2["ski_type_id"]] = $row2["quantity"];
-                    $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number like :current_ON");
+                    $stmt2 = $this->db->prepare("select ski_type_id, quantity from order_skis where order_number = :current_ON");
                     $stmt2->bindValue(":current_ON", $currentOrderNumber);
                     $stmt2->execute();
                     $orderSkisRow = array();
@@ -134,68 +134,69 @@ class OrdersModel {
 
     public function splitOrder(array $query)
     {
-        print_r($query);
+        $countedSkis = 0;
         $skis = array();
         try {
+            $oldSkis = $this->getOrderedSkis($query);
             $this->db->beginTransaction();
+            $newSkis = array();
             $stmt = $this->db->prepare(
-                'select order_skis.*, `order`.customer_id from order_skis
-                        LEFT JOIN `order`
-                        on order_skis.order_number = `order`.order_number 
-                        where order_skis.order_number LIKE :orderNumber and `order`.customer_id like :customerID');
-            $stmt->bindValue(':customerID', $query["customer_id"]);
-            $stmt->bindValue(":orderNumber", $query["order_number"]);
-            $stmt->execute();
-            $stmt2 = $this->db->prepare(
                 "select count(order_no) 
                         from ski
-                        where (ski_type_id like :stid) 
-                          and (order_no like :order_no)
+                        where (ski_type_id = :stid) 
+                          and (order_no = :order_no)
                         ");
-            $newSkis = array();
-            $oldSkis = array();
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                print_r($row);
-                $stmt2->bindValue(":stid", $row["ski_type_id"]);
-                $stmt2->bindValue(":order_no", $row["order_number"]);
-                $stmt2->execute();
-
-                $readySkis = $stmt2->fetch(PDO::FETCH_ASSOC);
-
-                $quantity = $row["quantity"] - $readySkis["count(order_no)"];
-                if ($quantity > 0) {
-                    $newSkis += [$row["ski_type_id"] => $quantity];
-                    $oldSkis += [$row["ski_type_id"] => $row["quantity"]];
+            foreach ($oldSkis as $id => $oldQuantity){
+                $stmt->bindValue(":stid", $id);
+                $stmt->bindValue(":order_no", $query["order_number"]);
+                $stmt->execute();
+                $readySkis = $stmt->fetch(PDO::FETCH_ASSOC);
+                $countedSkis += $readySkis["count(order_no)"];
+                $newQuantity = $oldQuantity - $readySkis["count(order_no)"];
+                if ($newQuantity > 0) {
+                    $newSkis += [$id => $newQuantity];
                 }
             }
             $skis = ["newSkis" => $newSkis, "oldSkis" => $oldSkis];
-            print_r($skis);
-
             $this->db->commit();
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log($e);
         }
-        if ($this->updateOrDeleteOrder_skis($query, $skis)) {
-            //$newOrder = ["customer_id" => $query["customer_id"], "skis" => $skis["newSkis"]];
-            $this->addOrder(["skis"=>$skis["newSkis"]], $query);
+        if ($countedSkis != 0) {
+            if ($this->updateOrDeleteOrder_skis($query, $skis)) {
+                $uri = array( "", "" , $query["order_number"]);
+                $payload = array("state"=>"ready", "shipment_number"=>"");
+                if($this->updateOrder($uri, $payload)){
+                    $this->addOrder(["skis" => $skis["newSkis"]], $query);
+                }
+            }
+        }else {
+            print_r("No split executed cause no skis were counted.");
         }
+    }
 
+    private function getOrderedSkis(array $query):array{
+        $stmt = $this->db->prepare(
+            'select * from order_skis
+                    where order_skis.order_number = :orderNumber');
+        $stmt->bindValue(":orderNumber", $query["order_number"]);
+        $stmt->execute();
+        $skis = array();
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $skis += [$row["ski_type_id"] => $row["quantity"]];
+        }
+        return $skis;
     }
 
     private function updateOrDeleteOrder_skis(array $query, array $payload): bool {
         try {
             $this->db->beginTransaction();
             foreach ($payload["newSkis"] as $id => $splitQuantity) {
-                print_r("From old order: " . $payload["oldSkis"][$id] . "\n");
-                print_r("To new order: " . $splitQuantity . "\n");
-                print_r("ski type id: " . $id ."\n");
                 $newQuantity = $payload["oldSkis"][$id] - $splitQuantity;
                 if ($payload["oldSkis"][$id] == $splitQuantity){
-                    print_r("Run delete\n");
                     $this->deleteFromOrder_skis($id, $query["order_number"]);
                 }else{
-                    print_r("run update");
                     $this->updateOrder_skis($newQuantity, $id, $query["order_number"]);
                 }
             }
@@ -210,9 +211,8 @@ class OrdersModel {
         $stmt = $this->db->prepare('
 UPDATE order_skis 
 SET quantity = :quantity
-WHERE order_number like :order_number 
-AND ski_type_id like :skitype');
-        print_r("SHould update skitype: " . $skiTypeID . "\tAnd order number: " . $orderNumber . "\n");
+WHERE order_number = :order_number 
+AND ski_type_id = :skitype');
         $stmt->bindValue(":quantity", $quantity);
         $stmt->bindValue(":order_number", $orderNumber);
         $stmt->bindValue(":skitype", $skiTypeID);
@@ -222,9 +222,8 @@ AND ski_type_id like :skitype');
     private function deleteFromOrder_skis(String $skiTypeID, String $orderNumber): bool{
         $stmt = $this->db->prepare('
 DELETE FROM order_skis 
-WHERE order_number like :order_number 
-AND ski_type_id like :skitype');
-        print_r("SHould delete skitype: " . $skiTypeID . "\tAnd order number: " . $orderNumber . "\n");
+WHERE order_number = :order_number 
+AND ski_type_id = :skitype');
         $stmt->bindValue(":order_number", $orderNumber);
         $stmt->bindValue(":skitype", $skiTypeID);
         return $stmt->execute();
@@ -233,22 +232,22 @@ AND ski_type_id like :skitype');
 
     /**
      * Method will update the order that matches the orderNumber parameter with the new values provided by the other parameters.
-     * @param array $payload    Array payload:
-     *                          Index 0: State
-     *                          Index 1: Reference to larger order.
-     *                          Index 2: Shipment number.
-     * @param array $query      Indexes:
-     *                          "customer_id"   -> customer number.
-     *                          "order_number"  -> order number.
+     * @param array $uri
+     * @param array $payload     Indexes:
+     *                          "state"   -> new status of the order.
+     *                          "shipment_number"  -> new shipment number.
      * @return bool
      */
     public function updateOrder(array $uri, array $payload): bool {
         try {
+            print_r($uri);
+            print_r($payload);
             $this->db->beginTransaction();
             $stmt = $this->db->prepare('
 UPDATE `order` 
-SET `state` = :state, shipment_number = :shipment_number 
-WHERE order_number like :order_number');
+SET `state` = :state, shipment_number = :shipment_number, total_price = :total_price
+WHERE order_number = :order_number');
+
             $stmt->bindValue(":order_number", $uri[2]);
             $stmt->bindValue(":state", $payload['state']);
             if(!empty($payload['shipment_number']) && $uri[0] == RESTConstants::ENDPOINT_SHIPPER) {
@@ -256,6 +255,13 @@ WHERE order_number like :order_number');
             } else {
                 $stmt->bindValue(":shipment_number", null);
             }
+            $getSkis = array( "skis"=> $this->getOrderedSkis(["order_number"=>$uri[2]]));
+            print_r("Getskis: \n");
+            print_r($getSkis);
+            $totalPrice = $this->getTotalPrice($getSkis);
+            print_r("total price: \n");
+            print_r($totalPrice);
+            $stmt->bindValue(":total_price", $totalPrice);
             $stmt->execute();
             return $this->db->commit();
         }catch (Exception $e){
@@ -279,8 +285,8 @@ WHERE order_number like :order_number');
             $stmt = $this->db->prepare(
                 'UPDATE `order` 
 SET `state` = :state 
-WHERE order_number like :order_number 
-AND customer_id like :customer_id');
+WHERE order_number = :order_number 
+AND customer_id = :customer_id');
             $stmt->bindValue(":state", "canceled");
             $stmt->bindValue(":order_number", $uri[2]);
             $stmt->bindValue(":customer_id", $queries["customer_id"]);
@@ -289,7 +295,7 @@ AND customer_id like :customer_id');
             $stmt2 = $this->db->prepare('
 SELECT `production_number` 
 FROM ski 
-WHERE order_no LIKE :order_number');
+WHERE order_no = :order_number');
             $stmt2->bindValue(":order_number", $uri[2]);
             $stmt2->execute();
 
@@ -298,7 +304,7 @@ WHERE order_no LIKE :order_number');
                     '
 UPDATE `ski` 
 SET `available` = 1, `order_no` = NULL 
-WHERE production_number LIKE :production_number');
+WHERE production_number = :production_number');
                 $stmt3->bindValue(":production_number", $row['production_number']);
                 $stmt3->execute();
             }
@@ -317,11 +323,8 @@ WHERE production_number LIKE :production_number');
     private function getTotalPrice(array $orderedSkis): int {
         $total_price = 0;
         try {
-            $this->db->beginTransaction();
             print_r($orderedSkis);
             foreach ($orderedSkis["skis"] as $id => $id_value) {
-                print_r("id = " . $id . "\n");
-                print_r("quantity = " .  $id_value . "\n");
                 $stmt = $this->db->prepare("
                                     select MSRP 
                                     from ski_type
@@ -329,11 +332,8 @@ WHERE production_number LIKE :production_number');
                 $stmt->bindValue(":id", $id);
                 $stmt->execute();
                 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    print_r("price = " . $row["MSRP"] . "\n");
                     $total_price += $row["MSRP"] * $id_value;
-                    print_r( "total price = " . $total_price . "\n");
                 }
-
             }
         } catch (Exception $e){
             $this->db->rollBack();
@@ -357,10 +357,11 @@ WHERE production_number LIKE :production_number');
      */
     public function addOrder(array $orderedSkis, array $queries): void {
         try {
+            $this->db->beginTransaction();
             $stmt = $this->db->prepare(
                 'INSERT INTO `order` (total_price, state,  customer_id, date)'
                 .' VALUES(:total_price, :state, :customer_id, :date)');
-            $stmt->bindValue(':total_price', $this->getTotalPrice($orderedSkis));
+            $stmt->bindValue(':total_price', $this->getTotalPrice(["skis"=> $orderedSkis["skis"]]));
             $stmt->bindValue(':state', "new");
             $stmt->bindValue(':customer_id', $queries["customer_id"]);
             $stmt->bindValue(":date", date("Y-m-d"));
