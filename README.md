@@ -2,7 +2,9 @@
 
 ## Running the Web server
 
-First make a file called `dbCredentials.php`, the template for this file is called `dbCredentialsTemplate.php`. Then run the installation script. (Not made yet)
+First make a file called `dbCredentials.php`, the template for this file is called `dbCredentialsTemplate.php`.
+
+When the dbCredentials file is made with the correct information, run the setup script called `Setup.php`.
 
 To start the web server, use the command: `php -S localhost:8080 api.php`.
 
