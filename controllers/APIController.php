@@ -54,19 +54,23 @@ class APIController
                 $endpoint = $uri[0];
                 if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
                     return array(false);
-                } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
+                } else if ($endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
                     return $model->getOrder($uri, $queries);
                 } else if($endpoint == RESTConstants::ENDPOINT_CUSTOMER) {
                     return $model->getOrdersByCustomerId($queries);
                 } else if($endpoint == RESTConstants::ENDPOINT_SHIPPER) {
                     return $model->getOrder($uri, array("state" => "ready-for-shipping"));
+                } else if($endpoint == RESTConstants::ENDPOINT_STOREKEEPER) {
+                    return $model->getOrder($uri, array("state" => "skis-available"));
                 }
                 return array(false);
             case RESTConstants::METHOD_POST:
                 $model = new OrdersModel();
                 // TODO: add printing to user whether order is added, also print order ID
-                $model->addOrder($payload, $queries);
-                return array(true);
+                if($model->addOrder($payload, $queries)) {
+                    return array(true);
+                }
+                return array(false);
         }
         return array();
     }
@@ -107,6 +111,13 @@ class APIController
                 } else {
                     return array(false);
                 }
+            case RESTConstants::METHOD_POST:
+                $model = new OrdersModel();
+                $res = $model->splitOrder($uri, $queries);
+                if($res) {
+                    return array(true);
+                }
+                return array(false);
             case RESTConstants::METHOD_DELETE:
                 $model = new OrdersModel();
                 $success = $model->cancelOrder($uri, $queries);

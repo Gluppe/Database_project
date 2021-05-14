@@ -120,11 +120,10 @@ localhost:8080/customer/orders/{:order_number}{?customer_id={:id}}
 
 Example request: `localhost:8080/customer/orders/1?customer_id=10`
 
-TODO: make this
 
 ### Production Plan
 
-This endpoint allows the customer to see a production plan summary of a choosen month
+This endpoint allows the customer to see a production plan summary of a chosen month
 
 #### - Request
 
@@ -158,6 +157,11 @@ localhost:8080/shipper/orders
 ```
 Method: PATCH
 localhost:8080/shipper/orders/{order_number}
+Body:
+{
+    "state": "shipped"
+    "shipment_number": 100
+}
 ```
 `{order_number}` is a mandatory parameter
 
@@ -178,6 +182,7 @@ Method: POST
 localhost:8080/planner/production-plan
 Body: 
 {
+    "month": month_number,
     "skis": {
         "ski_type_id": quantity,
         "ski_type_id": quantity
@@ -188,7 +193,8 @@ Example request: `localhost:8080/planner/production-plan`
 
 Example body:
 ```
-{
+{   
+    "month": 5
     "skis": {
         "1": 50,
         "2": 100,
@@ -209,6 +215,8 @@ localhost:8080/storekeeper/orders
 This endpoint allows a storekeeper to add a new ski
 
 ##### - Request
+
+##### Add a new ski with given ski type id:
 ```
 Method: POST
 localhost:8080/storekeeper/skis
@@ -232,9 +240,20 @@ This endpoint allows a storekeeper to update the state of the order
 
 #### - Requests
 
+#### Get orders with status skis-available:
+```
+Method: GET
+localhost:8080/storekeeper/orders/
+```
+
+#### Update the state of an order:
 ```
 Method: PATCH
 localhost:8080/storekeeper/orders/{order_number}
+Body:
+{
+    "state": "ready-for-shipping"
+}
 ```
 `{order_number}` is a mandatory parameter
 
@@ -255,10 +274,17 @@ localhost:8080/customer-rep/orders{?state={:state}}
 `{?state={:state}}` is an optional query used to get only orders of a certain state
 
 
-##### Update the state of an order:
+##### Change the state of an order to either open or skis-available:
 ```
 Method: PATCH
 localhost:8080/storekeeper/orders/{order_number}
+Body:
+{
+    "state": "open/skis-available"
+}
 ```
 `{order_number}` is a mandatory parameter
+
+
+
 
