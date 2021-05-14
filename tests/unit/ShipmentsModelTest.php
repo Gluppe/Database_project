@@ -24,7 +24,7 @@ class ShipmentsModelTest extends Unit
      * Test for getting a shipment. Shipmentmodel returns an array. take the first
      * index in the array and check if the shipment number is the same as your imput.
      */
-    public function testGeShipmentByShipmentNumber() {
+    public function testGetShipmentByShipmentNumber() {
         $ShipmentsModel = new ShipmentsModel();
 
         $res = $ShipmentsModel->getShipment(array('100'));
