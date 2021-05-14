@@ -102,7 +102,7 @@ try {
             case RESTConstants::METHOD_DELETE:
                 http_response_code(RESTConstants::HTTP_ACCEPTED);
                 $response["status code"] = RESTConstants::HTTP_ACCEPTED;
-                $response["message"] = "Successfully deleted";
+                $response["message"] = "Successfully cancelled";
                 print(json_encode($response));
                 break;
             case RESTConstants::METHOD_POST:

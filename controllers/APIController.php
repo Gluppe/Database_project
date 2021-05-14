@@ -54,12 +54,14 @@ class APIController
                 $endpoint = $uri[0];
                 if($endpoint == RESTConstants::ENDPOINT_CUSTOMER && empty($queries['customer_id'])) {
                     return array(false);
-                } else if ($endpoint == RESTConstants::ENDPOINT_STOREKEEPER ||$endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
+                } else if ($endpoint == RESTConstants::ENDPOINT_CUSTOMERREP) {
                     return $model->getOrder($uri, $queries);
                 } else if($endpoint == RESTConstants::ENDPOINT_CUSTOMER) {
                     return $model->getOrdersByCustomerId($queries);
                 } else if($endpoint == RESTConstants::ENDPOINT_SHIPPER) {
                     return $model->getOrder($uri, array("state" => "ready-for-shipping"));
+                } else if($endpoint == RESTConstants::ENDPOINT_STOREKEEPER) {
+                    return $model->getOrder($uri, array("state" => "skis-available"));
                 }
                 return array(false);
             case RESTConstants::METHOD_POST:

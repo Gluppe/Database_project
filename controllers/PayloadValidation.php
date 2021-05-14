@@ -26,9 +26,7 @@ class PayloadValidation
      */
     public function isValidPostPayload(array $uri, array $payload): bool
     {
-        if(empty($payload)) {
-            return false;
-        }
+
         return match ($uri[0]) {
             RESTConstants::ENDPOINT_CUSTOMER => $this->isValidCustomerPayload($uri, $payload),
             RESTConstants::ENDPOINT_STOREKEEPER => $this->isValidStorekeeperPayload($uri, $payload),
@@ -56,6 +54,12 @@ class PayloadValidation
     public function isValidCustomerPayload(array $uri, array $payload): bool {
         switch ($uri[1]) {
             case RESTConstants::ENDPOINT_ORDERS:
+                if(!empty($uri[2])) {
+                    return true;
+                }
+                if(empty($payload)) {
+                    return false;
+                }
                 if(empty($payload['skis'])) {
                     return false;
                 }
@@ -79,6 +83,9 @@ class PayloadValidation
      * @return bool returns true if the payload is valid, and false otherwise
      */
     public function isValidStorekeeperPayload(array $uri, array $payload): bool {
+        if(empty($payload)) {
+            return false;
+        }
         switch ($uri[1]) {
             case RESTConstants::ENDPOINT_SKIS:
                 if (!empty($payload['ski_type_id'])) {
@@ -105,6 +112,9 @@ class PayloadValidation
      * @return bool returns true if the payload is valid, and false otherwise
      */
     public function isValidPlannerPayload(array $uri, array $payload): bool {
+        if(empty($payload)) {
+            return false;
+        }
         switch ($uri[1]) {
             case RESTConstants::ENDPOINT_PRODUCTION_PLAN:
                 if (empty($payload['month']) || empty($payload['skis'])) {

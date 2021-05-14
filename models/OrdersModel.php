@@ -287,6 +287,9 @@ WHERE order_number = :order_number');
      */
     public function cancelOrder(array $uri, array $queries): bool {
         $success = false;
+        if(!$this->orderNumberCustomerIdMatch($uri[2], $queries['customer_id'])) {
+            return false;
+        }
         try {
             $this->db->beginTransaction();
             $stmt = $this->db->prepare(
