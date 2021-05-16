@@ -23,7 +23,7 @@ class ProductionPlanModelTest extends Unit
         $model = new ProductionPlanModel();
 
         $res = $model->getProductionPlan("5");
-        $this->tester->assertEquals($res, array('month' => '05', 'skis' => array('1' => 100, '2' => 50)));
+        $this->tester->assertEquals($res, array(array('month' => '05', 'skis' => array('1' => 100, '2' => 50))));
     }
 
     public function testAddProductionPlan() {

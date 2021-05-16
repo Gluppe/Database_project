@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 14, 2021 at 12:34 PM
+-- Generation Time: May 15, 2021 at 12:00 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 8.0.3
 
@@ -37,9 +37,10 @@ CREATE TABLE `auth_token` (
 --
 
 INSERT INTO `auth_token` (`token`, `endpoint`) VALUES
-('01523c5d-3ccd-464c-921e-8f12223be5e8', 'employee'),
-('1dec31f3-87d8-4a00-93b7-6961e1014a07', 'customer'),
-('4b27e7ec-a2b0-4462-8938-c111e59a1507', 'shipper');
+('0ee1345a-2a0c-497b-8c6e-4b25507fb931', 'shipper'),
+('4e114242-a7ee-42d0-9c4e-fe25e89a5321', 'employee'),
+('5b2c303a-43a9-4abf-a51a-b2d109527c7d', 'customer'),
+('8940207e-eca3-479f-8231-6c7ddf038a78', 'public');
 
 -- --------------------------------------------------------
 
@@ -59,8 +60,8 @@ CREATE TABLE `customer` (
 --
 
 INSERT INTO `customer` (`ID`, `name`, `start_date`, `end_date`) VALUES
-(10, 'Stian', '2021-03-21', NULL),
-(11, 'Stian', '2021-03-21', NULL);
+(10, 'customer1', '2021-03-21', NULL),
+(11, 'customer2', '2021-03-21', NULL);
 
 -- --------------------------------------------------------
 
@@ -123,8 +124,8 @@ CREATE TABLE `order` (
 --
 
 INSERT INTO `order` (`order_number`, `total_price`, `state`, `reference_to_larger_order`, `shipment_number`, `customer_id`, `date`) VALUES
-(1, 1000, 'ready-for-shipping', NULL, NULL, 10, '2021-04-07'),
-(428, 500, 'ready-for-shipping', NULL, NULL, 10, '2021-04-01');
+(1, 3100, 'new', NULL, 100, 10, '2021-04-07'),
+(428, 1300, 'new', NULL, 100, 10, '2021-04-01');
 
 -- --------------------------------------------------------
 
@@ -159,6 +160,13 @@ CREATE TABLE `production_plan` (
   `month` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `production_plan`
+--
+
+INSERT INTO `production_plan` (`ID`, `month`) VALUES
+(1, '2021-05-01');
+
 -- --------------------------------------------------------
 
 --
@@ -170,6 +178,14 @@ CREATE TABLE `production_skis` (
   `daily_amount` int(11) NOT NULL,
   `production_plan_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `production_skis`
+--
+
+INSERT INTO `production_skis` (`ski_type_id`, `daily_amount`, `production_plan_id`) VALUES
+(1, 100, 1),
+(2, 50, 1);
 
 -- --------------------------------------------------------
 
@@ -192,7 +208,8 @@ CREATE TABLE `shipments` (
 --
 
 INSERT INTO `shipments` (`shipment_number`, `store_name`, `shipping_address`, `scheduled_pickup_date`, `status`, `driver_id`, `transporter_company_id`) VALUES
-(100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500);
+(100, 'Best store', 'This is an address', '2021-03-23', 'pickupable', 5, 500),
+(102, 'nice store', 'address example', '2021-05-18', 'waiting', 5, 500);
 
 -- --------------------------------------------------------
 
@@ -212,7 +229,7 @@ CREATE TABLE `ski` (
 --
 
 INSERT INTO `ski` (`production_number`, `available`, `order_no`, `ski_type_id`) VALUES
-(1, 1, 1, 2),
+(1, 0, 1, 2),
 (2, 1, NULL, 1),
 (3, 1, NULL, 1),
 (4, 1, NULL, 1),
@@ -248,8 +265,8 @@ CREATE TABLE `ski_type` (
 --
 
 INSERT INTO `ski_type` (`ID`, `model`, `type`, `temperature`, `grip_system`, `size`, `weight_class`, `description`, `discontinued`, `url`, `MSRP`) VALUES
-(1, 'Super ski 3000', 'Classic', 'warm', 'super grip', 142, '80-90', 'This is a classic ski', 0, '', 1000),
-(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'This is a ski', 0, '', 500);
+(1, 'Active Pro', 'Classic', 'warm', 'super grip', 142, '80-90', 'This is a classic ski', 0, '', 100),
+(2, 'Active', 'skate', 'cold', 'wax', 147, '80-90', 'This is a ski', 0, '', 80);
 
 -- --------------------------------------------------------
 
@@ -282,7 +299,11 @@ CREATE TABLE `transition_history` (
 --
 
 INSERT INTO `transition_history` (`transition_history_id`, `order_number`, `state_change`, `datetime`) VALUES
-(1, 428, 'shipped -> shipped', '2021-05-13 14:40:10');
+(1, 1, 'new -> open', '2021-05-13 14:18:16'),
+(2, 1, 'new -> skis-available', '2021-05-13 21:19:08'),
+(3, 1, 'new -> skis-available', '2021-05-13 23:07:47'),
+(4, 1, 'shipped -> shipped', '2021-05-14 12:27:01'),
+(5, 1, 'shipped -> shipped', '2021-05-14 12:28:40');
 
 -- --------------------------------------------------------
 
@@ -300,7 +321,7 @@ CREATE TABLE `transporter` (
 --
 
 INSERT INTO `transporter` (`company_id`, `company_name`) VALUES
-(500, 'Stian shipping inc');
+(500, 'Shippinc company name');
 
 --
 -- Indexes for dumped tables
@@ -436,13 +457,13 @@ ALTER TABLE `order`
 -- AUTO_INCREMENT for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `shipments`
 --
 ALTER TABLE `shipments`
-  MODIFY `shipment_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `shipment_number` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `ski`
@@ -460,7 +481,7 @@ ALTER TABLE `ski_type`
 -- AUTO_INCREMENT for table `transition_history`
 --
 ALTER TABLE `transition_history`
-  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `transition_history_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `transporter`
