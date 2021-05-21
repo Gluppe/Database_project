@@ -85,7 +85,6 @@ class ProductionPlanModel
         $res = array();
         $res['month'] = $month;
         $res['skis'] = $productionSkisRow;
-        $res = array($res);
-        return $res;
+        return array($res);
     }
 }
