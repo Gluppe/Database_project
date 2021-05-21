@@ -75,7 +75,7 @@ class APIController
         return array();
     }
 
-    /** handleOrderRequest handles what happens when the Order endpoint is used
+    /** handleOrderRequest handles what happens when the Orders endpoint is used with an order id
      * @param array $uri contains the path in an array
      * @param string $requestMethod contains the request method used
      * @param array $queries contains the queries used
