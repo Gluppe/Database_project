@@ -89,7 +89,7 @@ class SkisModel
     }
 
     /**
-     * Gets an individual ski, based on the order number of that specific ski
+     * Gets an individual ski, based on the order number of that specific ski.
      * @param string $production_number is the production number of the ski
      * @return array single ski returned as an array
      */
@@ -136,11 +136,9 @@ class SkisModel
     }
 
     /**
-     * A function for adding a new ski using an insert into SQL statement
-     * @param array $payload
-     * index 0 = available
-     * index 1 = order_no
-     * index 2 = ski_type_id
+     * A function for adding a new ski using an insert into SQL statement.
+     * @param array $payload contains the ski type id of the ski added
+     * @return bool returns true if successful, false otherwise
      */
     public function addSki(array $payload): bool
     {

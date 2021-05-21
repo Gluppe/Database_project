@@ -133,6 +133,11 @@ class PayloadValidation
         }
     }
 
+    /** isValidUpdateOrderPayload checks if the paylaod is valid for update order requests
+     * @param array $uri contains the path in an array
+     * @param array $payload contains the payload in an array
+     * @return bool returns true if the payload is valid, and false otherwise
+     */
     public function isValidUpdateOrderPayload(array $uri, array $payload): bool
     {
         switch($uri[1]) {

@@ -19,6 +19,9 @@ class ProductionPlanModelTest extends Unit
     {
     }
 
+    /**
+     * testGetProductionPlan tries to get a production plan from the test database, and then the response is validated.
+     */
     public function testGetProductionPlan() {
         $model = new ProductionPlanModel();
 
@@ -26,6 +29,10 @@ class ProductionPlanModelTest extends Unit
         $this->tester->assertEquals($res, array(array('month' => '05', 'skis' => array('1' => 100, '2' => 50))));
     }
 
+    /**
+     * testAddProductionPlan tries to add a production plan, and then checks if the production plan and the corresponding
+     * ski types are in the database
+     */
     public function testAddProductionPlan() {
         $model = new ProductionPlanModel();
         $payload = array('month' => '06', 'skis' => array('1' => 50, '2' => 100));

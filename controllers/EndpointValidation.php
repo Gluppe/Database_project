@@ -7,22 +7,15 @@ class EndpointValidation {
      */
     public function isValidEndpoint(array $uri): bool
     {
-        switch (strtolower($uri[0])) {
-            case RESTConstants::ENDPOINT_CUSTOMER:
-                return $this->validCustomerEndpoint($uri[1]);
-            case RESTConstants::ENDPOINT_CUSTOMERREP:
-                return $this->validCustomerRepEndpoint($uri[1]);
-            case RESTConstants::ENDPOINT_PLANNER:
-                return $this->validPlannerEndpoint($uri[1]);
-            case RESTConstants::ENDPOINT_PUBLIC:
-                return $this->validPublicEndpoint($uri[1]);
-            case RESTConstants::ENDPOINT_SHIPPER:
-                return $this->validShipperEndpoint($uri[1]);
-            case RESTConstants::ENDPOINT_STOREKEEPER:
-                return $this->validStorekeeperEndpoint($uri[1]);
-            default:
-                return false;
-        }
+        return match (strtolower($uri[0])) {
+            RESTConstants::ENDPOINT_CUSTOMER => $this->validCustomerEndpoint($uri[1]),
+            RESTConstants::ENDPOINT_CUSTOMERREP => $this->validCustomerRepEndpoint($uri[1]),
+            RESTConstants::ENDPOINT_PLANNER => $this->validPlannerEndpoint($uri[1]),
+            RESTConstants::ENDPOINT_PUBLIC => $this->validPublicEndpoint($uri[1]),
+            RESTConstants::ENDPOINT_SHIPPER => $this->validShipperEndpoint($uri[1]),
+            RESTConstants::ENDPOINT_STOREKEEPER => $this->validStorekeeperEndpoint($uri[1]),
+            default => false,
+        };
     }
 
     public function validCustomerEndpoint(string $endpoint): bool

@@ -19,6 +19,10 @@ class TransitionHistoryModelTest extends Unit
     {
     }
 
+    /**
+     * testAddTransitionHistory tries to add a new transition history, then checks the database if there is
+     * a state change corresponding to this new transition history.
+     */
     public function testAddTransitionHistory() {
         $transitionHistoryModel = new TransitionHistoryModel();
         $transitionHistoryModel->addTransitionHistory(1, "skis-available", "new");

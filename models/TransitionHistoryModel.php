@@ -14,7 +14,8 @@ class TransitionHistoryModel {
     /**
      * A function for adding a new transition order
      * @param int $orderNumber The order number of the order changing state
-     * @param string $state The new state of the order
+     * @param string $newState the new state
+     * @param string $oldState the old state
      */
     public function addTransitionHistory(int $orderNumber, string $newState, string $oldState) {
         try {

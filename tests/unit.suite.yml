@@ -9,7 +9,7 @@ modules:
         - \Helper\Unit
         - Db:
            dsn: 'mysql:host=localhost;dbname=testdb'
-           user: 'root'
+           user: ''
            password: ''
            dump: tests/_data/testdb.sql
            populate: true
