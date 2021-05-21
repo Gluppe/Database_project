@@ -132,7 +132,7 @@ class APIController
     }
 
 
-    /** handleSkisRequest handles what happens when the Ski endpoint is used
+    /** handleSkisRequest handles what happens when the Skis endpoint is used
      * @param array $uri contains the path in an array
      * @param string $requestMethod contains the request method used
      * @param array $queries contains the queries used

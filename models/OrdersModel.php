@@ -16,9 +16,9 @@ class OrdersModel {
 
     /**
      * Method will return an order that matches the order_number parameter.
+     * @param array $uri        this contains the path in an array
      * @param array $query      Array query:
-     *                          Index 0: Customer number.
-     *                          Index 1: Order Number.
+     *                          Index 'customer_id': Customer number.
      * @return array            Array with all orders and all values of the order
      */
     public function getOrder(array $uri, array $query): array {
@@ -125,20 +125,19 @@ class OrdersModel {
         return $result;
     }
 
-    /*
-     * Får inn orderenummer
-     * finn antall ski som bestilles innen skityper.
-     *  finn antall ski som er gitt ordrenummer
-     *  opprett nytt ordrenummer på dette antallet.
+    /** splitOrder splits an order and creates a new order with all the skis that are currently ready to be shipped.
+     *  The skis that are already produced will be removed from the old order.
+     * @param array $uri this contains the path in an array
+     * @param array $query contains the customer id at index 'customer_id'
+     * @return bool returns true if successful
      */
-
     public function splitOrder(array $uri, array $query): bool
     {
         $countedSkis = 0;
         $skis = array();
         $success = false;
         if(!$this->orderNumberCustomerIdMatch($uri[2], $query['customer_id'])) {
-            return false;
+            return $success;
         }
         try {
             $oldSkis = $this->getOrderedSkis($uri);
@@ -183,6 +182,10 @@ class OrdersModel {
         return $success;
     }
 
+    /** getOrderedSkis gets the quantity of ski types ordered
+     * @param array $uri this contains the path in an array
+     * @return array an array of all the ski types in the given order
+     */
     private function getOrderedSkis(array $uri): array {
         $stmt = $this->db->prepare(
             'select * from order_skis
@@ -196,6 +199,11 @@ class OrdersModel {
         return $skis;
     }
 
+    /** Will updated the order_skis table, and if the quantity is 0, it is deleted from the old order.
+     * @param array $uri this contains the path in an array
+     * @param array $payload contains the payload
+     * @return bool returns true if successful, false otherwise
+     */
     private function updateOrDeleteOrder_skis(array $uri, array $payload): bool {
         try {
             $this->db->beginTransaction();
@@ -207,13 +215,21 @@ class OrdersModel {
                     $this->updateOrder_skis($newQuantity, $id, $uri[2]);
                 }
             }
-            return $this->db->commit();
-        }catch (Exception $e){
+            $this->db->commit();
+            return true;
+        } catch (Exception $e){
             error_log($e);
-            return $this->db->rollBack();
+            $this->db->rollBack();
+            return false;
         }
     }
 
+    /** updateOrder_skis will update the quantity of a given ski type.
+     * @param String $quantity the new quantity
+     * @param String $skiTypeID the ski type id
+     * @param String $orderNumber the order number
+     * @return bool returns true if successful, false otherwise
+     */
     private function updateOrder_skis(String $quantity, String $skiTypeID, String $orderNumber): bool {
         $stmt = $this->db->prepare('
 UPDATE order_skis 
@@ -226,6 +242,11 @@ AND ski_type_id = :skitype');
         return $stmt->execute();
     }
 
+    /** deleteFromOrder_skis will delete a ski type from the order_skis table, because the quantity was updated to 0.
+     * @param String $skiTypeID the ski type id
+     * @param String $orderNumber the order number
+     * @return bool returns true if successful, false otherwise
+     */
     private function deleteFromOrder_skis(String $skiTypeID, String $orderNumber): bool{
         $stmt = $this->db->prepare('
 DELETE FROM order_skis 
@@ -247,8 +268,6 @@ AND ski_type_id = :skitype');
      */
     public function updateOrder(array $uri, array $payload): bool {
         try {
-            //print_r($uri);
-            //print_r($payload);
             $this->db->beginTransaction();
             $stmt = $this->db->prepare('
 UPDATE `order` 
@@ -263,11 +282,7 @@ WHERE order_number = :order_number');
                 $stmt->bindValue(":shipment_number", null);
             }
             $getSkis = array( "skis" => $this->getOrderedSkis($uri));
-            //print_r("Getskis: \n");
-            //print_r($getSkis);
             $totalPrice = $this->getTotalPrice($getSkis);
-            //print_r("total price: \n");
-            //print_r($totalPrice);
             $stmt->bindValue(":total_price", $totalPrice);
             $stmt->execute();
             return $this->db->commit();
@@ -330,6 +345,10 @@ WHERE production_number = :production_number');
     }
 
 
+    /** getTotalPrice gets the total price of a set of ski types.
+     * @param array $orderedSkis the set of ski types
+     * @return int returns the price as an integer
+     */
     private function getTotalPrice(array $orderedSkis): int {
         $total_price = 0;
         try {
@@ -357,12 +376,12 @@ WHERE production_number = :production_number');
      * @param array $orderedSkis should look like this:
      *      Array
      *       (
-     *           [customer_id] => <a_customerID>
      *           [skis] => Array
      *           (
      *               [<ski_type_id>] => <quantity>
      *           )
      *       )
+     * @param array $queries contains the customer id at index 'customer_id'
      */
     public function addOrder(array $orderedSkis, array $queries): bool {
         $success = false;
@@ -395,6 +414,11 @@ WHERE production_number = :production_number');
         return $success;
     }
 
+    /** orderNumberCustomerIdMatch checks if an order has the give customer id.
+     * @param string $orderNumber the order number
+     * @param string $customer_id the customer id
+     * @return bool returns true if they match, false otherwise
+     */
     public function orderNumberCustomerIdMatch(string $orderNumber, string $customer_id): bool {
         $stmt = $this->db->prepare('SELECT customer_id FROM `order` WHERE order_number LIKE :order_number');
         $stmt->bindValue(':order_number', $orderNumber);
